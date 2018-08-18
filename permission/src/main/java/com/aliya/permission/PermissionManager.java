@@ -1,5 +1,6 @@
 package com.aliya.permission;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -31,7 +32,7 @@ public class PermissionManager {
 
     private static Context sContext;
 
-    public static void init(Context context){
+    public static void init(Context context) {
         sContext = context.getApplicationContext();
     }
 
@@ -62,18 +63,18 @@ public class PermissionManager {
      * <p/>
      * 注：所申请权限必须在Manifest中静态注册，否则可能崩溃
      *
-     * @param permissionOp
-     * @param callback     回调
-     * @param permissions  权限数组
+     * @param activity    activity
+     * @param callback    回调
+     * @param permissions 权限数组
      * @return true：默认之前已经全部授权
      */
-    public boolean request(IPermissionOperate permissionOp,
-                                        PermissionCallback
-                                                callback, Permission... permissions) {
+    public boolean request(Activity activity,
+                           PermissionCallback
+                                   callback, Permission... permissions) {
         if (permissions == null) // 没有申请的权限 return true
             return true;
 
-        if (permissionOp == null || callback == null) {
+        if (activity == null || callback == null) {
             return false;
         }
 
@@ -116,8 +117,9 @@ public class PermissionManager {
                     }
                 } else {
                     mRequestCaches.put(opEntity.getRequestCode(), opEntity);
-                    permissionOp.exeRequestPermissions(opEntity.getWaitPermsArray(), opEntity
-                            .getRequestCode());
+                    RequestHelper.getPermissionOperate(activity)
+                            .exeRequestPermissions(
+                                    opEntity.getWaitPermsArray(), opEntity.getRequestCode());
                     opEntity.getWaitPerms().clear(); // 清空待申请权限
                 }
             }
@@ -136,12 +138,12 @@ public class PermissionManager {
      * @param permissions  申请权限集合 {@link Permission}
      * @param grantResults 申请结果集合
      */
-    public synchronized void onRequestPermissionsResult(int requestCode, String[]
-            permissions, int[] grantResults, IPermissionOperate showRationale) {
+    public static void onRequestPermissionsResult(int requestCode, String[]
+            permissions, int[] grantResults, PermissionOperate showRationale) {
 
-        OpEntity opEntity = mRequestCaches.get(requestCode);
+        OpEntity opEntity = get().mRequestCaches.get(requestCode);
         if (opEntity != null) {
-            mRequestCaches.remove(requestCode);
+            get().mRequestCaches.remove(requestCode);
 
             for (int i = 0; i < permissions.length; i++) {
                 if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {  // 权限被授予

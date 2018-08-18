@@ -14,7 +14,7 @@ import java.util.Set;
  * @author a_liYa
  * @date 2016-3-28 下午9:06:16
  */
-public class SPHelper {
+final class SPHelper {
 
     /**
      * 被拒绝权限（不再询问）
@@ -41,13 +41,6 @@ public class SPHelper {
 
     public SharedPreferences.Editor getSharedPreferencesEditor() {
         return sharedPreferences.edit();
-    }
-
-    public boolean hasKey(String key) {
-        if (sharedPreferences != null) {
-            return sharedPreferences.contains(key);
-        }
-        return false;
     }
 
     /**

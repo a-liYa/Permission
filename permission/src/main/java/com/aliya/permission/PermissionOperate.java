@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
  * @author a_liYa
  * @date 2016/9/17 21:37.
  */
-public interface IPermissionOperate {
+interface PermissionOperate {
 
     /**
      * 申请权限

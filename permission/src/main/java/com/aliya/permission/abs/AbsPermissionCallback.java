@@ -1,4 +1,6 @@
-package com.aliya.permission;
+package com.aliya.permission.abs;
+
+import com.aliya.permission.PermissionCallback;
 
 import java.util.List;
 
