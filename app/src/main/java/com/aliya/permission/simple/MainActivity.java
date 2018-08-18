@@ -1,45 +1,33 @@
 package com.aliya.permission.simple;
 
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.widget.ListView;
 
-import com.aliya.permission.Permission;
-import com.aliya.permission.PermissionCallback;
-import com.aliya.permission.PermissionManager;
+import com.aliya.fast.adapter.FastAdapter;
+import com.aliya.fast.entity.ListEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private ListView mListView;
+
+    static List<ListEntity> sList = new ArrayList<>();
+
+    static {
+        sList.add(new ListEntity(PermissionSimpleActivity.class, "Activity使用示例"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        PermissionManager.get().request(this, new PermissionCallback() {
-            @Override
-            public void onGranted(boolean isAlreadyDef) {
+        mListView = findViewById(R.id.list_view);
+        mListView.setAdapter(new FastAdapter(sList));
 
-            }
-
-            @Override
-            public void onDenied(List<String> neverAskPerms) {
-
-            }
-
-            @Override
-            public void onElse(List<String> deniedPerms, List<String> neverAskPerms) {
-
-            }
-
-        }, Permission.STORAGE_READE, Permission.STORAGE_WRITE);
-
-    }
-
-    @Override
-    public boolean shouldShowRequestPermissionRationale(@NonNull String permission) {
-        return super.shouldShowRequestPermissionRationale(permission);
     }
 
 }
