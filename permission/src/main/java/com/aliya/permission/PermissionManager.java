@@ -26,10 +26,9 @@ import static com.aliya.permission.PermissionManager.OpEntity.equalsSize;
  * @date 2016/7/21 22:22.
  */
 public class PermissionManager {
-    /**
-     * 被拒绝权限（不再询问）
-     */
+
     private static final String PERMISSION_NEVER_ASK = "permission_never_ask_sets";
+    private static final int EMPTY = 0;
 
     private volatile static PermissionManager mInstance;
 
@@ -72,7 +71,7 @@ public class PermissionManager {
 
         initContext(activity);
 
-        if (permissions == null) // 没有申请的权限 return true
+        if (permissions == null || permissions.length == EMPTY) // 没有申请的权限 return true
             return true;
 
         if (activity == null || callback == null) {
@@ -87,15 +86,14 @@ public class PermissionManager {
 
                 // 检查申请的权限是否在 AndroidManifest.xml 中
                 if (_get().mManifestPermissions.contains(permission.getPermission())) {
-                    //判断权限是否被授予
+                    // 判断权限是否被授予
                     if (checkPermission(permission.getPermission())) {
                         opEntity.addGrantedPermission(permission.getPermission());
                     } else {
                         if (neverAskPermissions == null) {
-                            neverAskPermissions = getNeverAskPermissions();
+                            neverAskPermissions = getNeverAskPermissions(Collections.EMPTY_SET);
                         }
                         if (neverAskPermissions.contains(permission.getPermission())) {
-                            //  没有被用户禁止弹窗提示
                             opEntity.addNeverAskPermission(permission.getPermission());
                         } else {
                             opEntity.addWaitPermission(permission.getPermission());
@@ -111,8 +109,8 @@ public class PermissionManager {
                 callback.onGranted(true);
                 return true;
             } else {
-                if (equalsSize(opEntity.waitPermissions, 0)) { // 待申请权限 == 0
-                    if (equalsSize(opEntity.grantedPermissions, 0)) {
+                if (equalsSize(opEntity.waitPermissions, EMPTY)) { // 待申请权限 == 0
+                    if (equalsSize(opEntity.grantedPermissions, EMPTY)) {
                         // 待申请 == 0 && 已授权 == 0
                         callback.onDenied(opEntity.neverAskPermissions);
                     } else { // 其他情况：部分拒绝、部分已授权
@@ -130,10 +128,6 @@ public class PermissionManager {
         return false;
     }
 
-    private static Set getNeverAskPermissions() {
-        return SPHelper.get(sContext).get(PERMISSION_NEVER_ASK, Collections.EMPTY_SET);
-    }
-
     /**
      * 权限申请结果处理
      *
@@ -148,28 +142,34 @@ public class PermissionManager {
         if (opEntity != null) {
             _get().mRequestCaches.remove(requestCode);
 
+            Set<String> neverAskPermissions = null;
             for (int i = 0; i < permissions.length; i++) {
                 if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {  // 权限被授予
                     opEntity.addGrantedPermission(permissions[i]);
-                } else {  // 权限被拒绝 1、拒绝 2、拒绝并不再询问
+                } else { // 权限被拒绝
                     if (!showRationale.exeShouldShowRequestPermissionRationale((permissions[i]))) {
-                        SPHelper spHelper = SPHelper.get(sContext);
-                        Set<String> neverAskPerms = spHelper.get(PERMISSION_NEVER_ASK,
-                                new HashSet<String>());
-                        neverAskPerms.add(permissions[i]);
-                        spHelper.put(PERMISSION_NEVER_ASK, neverAskPerms);
+                        // 1、拒绝且不再询问
+                        if (neverAskPermissions == null) {
+                            neverAskPermissions = getNeverAskPermissions(new HashSet<String>());
+                        }
+                        neverAskPermissions.add(permissions[i]);
                         opEntity.addNeverAskPermission(permissions[i]);
                     } else {
+                        // 2、拒绝
                         opEntity.addDeniedPermission(permissions[i]);
                     }
                 }
             }
 
+            if (neverAskPermissions != null) { // 保存至本地
+                SPHelper.get(sContext).put(PERMISSION_NEVER_ASK, neverAskPermissions).commit();
+            }
+
             if (opEntity.callback == null) return;
 
-            if (equalsSize(opEntity.deniedPermissions, 0)) {
+            if (equalsSize(opEntity.deniedPermissions, EMPTY)) {
                 opEntity.callback.onGranted(false);
-            } else if (equalsSize(opEntity.grantedPermissions, 0)) {
+            } else if (equalsSize(opEntity.grantedPermissions, EMPTY)) {
                 opEntity.callback.onDenied(opEntity.neverAskPermissions);
             } else {
                 opEntity.callback.onElse(opEntity.deniedPermissions, opEntity.neverAskPermissions);
@@ -177,10 +177,14 @@ public class PermissionManager {
         }
     }
 
+    static Set getNeverAskPermissions(Set<String> defValue) {
+        return SPHelper.get(sContext).get(PERMISSION_NEVER_ASK, defValue);
+    }
+
     /**
      * 检查权限是否已经授权, 此方法有必要验证是否存在
      *
-     * @param permission
+     * @param permission 被检查权限
      * @return true: 已经授权
      */
     static boolean checkPermission(String permission) {
@@ -212,7 +216,6 @@ public class PermissionManager {
     }
 
     private Set<String> getManifestPermissions() {
-
         Set<String> manifestPermissions = null;
         PackageInfo packageInfo = null;
         try {
@@ -293,7 +296,10 @@ public class PermissionManager {
         }
 
         String[] getWaitPermsArray() {
-            return waitPermissions.toArray(new String[waitPermissions.size()]);
+            if (waitPermissions != null) {
+                return waitPermissions.toArray(new String[waitPermissions.size()]);
+            }
+            return null;
         }
 
         public static boolean equalsSize(List list, int size) {
