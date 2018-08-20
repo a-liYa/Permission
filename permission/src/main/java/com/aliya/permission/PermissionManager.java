@@ -6,7 +6,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.PermissionChecker;
 import android.util.SparseArray;
 
 import java.io.Serializable;
@@ -24,11 +23,12 @@ import static com.aliya.permission.PermissionManager.OpEntity.equalsSize;
  *
  * @author a_liYa
  * @date 2016/7/21 22:22.
+ * @see android.support.v4.app.ActivityCompat#requestPermissions(Activity, String[], int)
  */
 public class PermissionManager {
 
-    private static final String PERMISSION_NEVER_ASK = "permission_never_ask_sets";
     private static final int EMPTY = 0;
+    private static final String PERMISSION_NEVER_ASK = "permission_never_ask_sets";
 
     private volatile static PermissionManager mInstance;
 
@@ -46,15 +46,13 @@ public class PermissionManager {
     }
 
     private final SparseArray<OpEntity> mRequestCaches;
-    private Set<String> mManifestPermissions;
+    private final Set<String> mManifestPermissions;
 
     // 私有构造方法
     private PermissionManager() {
         mRequestCaches = new SparseArray<>();
         mManifestPermissions = getManifestPermissions();
     }
-
-//        ActivityCompat.requestPermissions(this, NEEDED_PERMISSIONS, PERMISSION_REQUEST_CODE);
 
     /**
      * 动态申请权限
@@ -182,31 +180,18 @@ public class PermissionManager {
     }
 
     /**
-     * 检查权限是否已经授权, 此方法有必要验证是否存在
+     * 检查权限是否已经授权
      *
      * @param permission 被检查权限
-     * @return true: 已经授权
+     * @return true: 已授权
      */
     static boolean checkPermission(String permission) {
-        boolean result = true;
-        int targetSdkVersion = 0;
-        Context ctx = sContext;
-        try {
-            PackageInfo info = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
-            targetSdkVersion = info.applicationInfo.targetSdkVersion;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (targetSdkVersion >= Build.VERSION_CODES.M) {
-                result = ContextCompat.checkSelfPermission(ctx, permission)
-                        == PackageManager.PERMISSION_GRANTED;
-            } else { // 若 targetSdkVersion < 23 且运行在M版本应用有上面代码检查会一直返回 PERMISSION_GRANTED
-                result = PermissionChecker.checkSelfPermission(ctx, permission)
-                        == PermissionChecker.PERMISSION_GRANTED;
-            }
+            // 对比 PermissionChecker.checkSelfPermission(ctx, permission)
+            return ContextCompat.checkSelfPermission(sContext, permission) == PackageManager
+                    .PERMISSION_GRANTED;
         }
-        return result;
+        return true;
     }
 
     private static void initContext(Context context) {
@@ -265,7 +250,11 @@ public class PermissionManager {
             this.callback = callback;
 
             requestCode = count++;
-            if (count > 0x0000ffff) {
+
+            /**
+             * @see android.support.v4.app.BaseFragmentActivityApi14#checkForValidRequestCode(int)
+             */
+            if ((count & 0xffff0000) != 0) {
                 count = 0;
             }
         }
