@@ -35,7 +35,7 @@ public class PermissionSimpleActivity extends Activity implements View.OnClickLi
     }
 
     private void requestCamera() {
-        PermissionManager.get().request(this, new PermissionCallback() {
+        PermissionManager.request(this, new PermissionCallback() {
 
             @Override
             public void onGranted(boolean isAlreadyDef) {
@@ -43,12 +43,12 @@ public class PermissionSimpleActivity extends Activity implements View.OnClickLi
             }
 
             @Override
-            public void onDenied(List<String> neverAskPerms) {
-                T.showShort(getBaseContext(), "拒绝： " + neverAskPerms);
+            public void onDenied(List<String> neverAskPermissions) {
+                T.showShort(getBaseContext(), "拒绝： " + neverAskPermissions);
             }
 
             @Override
-            public void onElse(List<String> deniedPerms, List<String> neverAskPerms) {
+            public void onElse(List<String> deniedPermissions, List<String> neverAskPermissions) {
 
             }
 
@@ -56,7 +56,7 @@ public class PermissionSimpleActivity extends Activity implements View.OnClickLi
     }
 
     private void requestStorage() {
-        PermissionManager.get().request(this, new PermissionCallback() {
+        PermissionManager.request(this, new PermissionCallback() {
 
             @Override
             public void onGranted(boolean isAlreadyDef) {
@@ -64,12 +64,12 @@ public class PermissionSimpleActivity extends Activity implements View.OnClickLi
             }
 
             @Override
-            public void onDenied(List<String> neverAskPerms) {
-                T.showShort(getBaseContext(), "拒绝： " + neverAskPerms);
+            public void onDenied(List<String> neverAskPermissions) {
+                T.showShort(getBaseContext(), "拒绝： " + neverAskPermissions);
             }
 
             @Override
-            public void onElse(List<String> deniedPerms, List<String> neverAskPerms) {
+            public void onElse(List<String> deniedPermissions, List<String> neverAskPermissions) {
 
             }
 

@@ -61,7 +61,7 @@ final class RequestHelper {
         public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                                @NonNull int[] grantResults) {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-            PermissionManager.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+            PermissionManager.onRequestPermissionResult(requestCode, permissions, grantResults, this);
         }
 
         @RequiresApi(api = Build.VERSION_CODES.M)

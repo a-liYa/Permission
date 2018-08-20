@@ -1,5 +1,7 @@
 package com.aliya.permission;
 
+import android.support.annotation.Nullable;
+
 import java.util.List;
 
 /**
@@ -12,22 +14,22 @@ public interface PermissionCallback {
     /**
      * 全部授予
      *
-     * @param isAlreadyDef 申请之前已经默认授权
+     * @param isAlreadyDef 申请之前已全部默认授权
      */
     void onGranted(boolean isAlreadyDef);
 
     /**
-     * 全部拒绝 包括不再询问集合
+     * 全部拒绝 包括不再询问权限
      *
-     * @param neverAskPerms 被拒绝(不再询问)权限集合
+     * @param neverAskPermissions 被拒绝(不再询问)权限集合
      */
-    void onDenied(List<String> neverAskPerms);
+    void onDenied(@Nullable List<String> neverAskPermissions);
 
     /**
      * 其他情况
      *
-     * @param deniedPerms   被拒绝权限集合(包括不再询问)
-     * @param neverAskPerms 被拒绝(不再询问)权限集合
+     * @param deniedPermissions   被拒绝权限集合(包括不再询问)
+     * @param neverAskPermissions 被拒绝(不再询问)权限集合
      */
-    void onElse(List<String> deniedPerms, List<String> neverAskPerms);
+    void onElse(@Nullable List<String> deniedPermissions, @Nullable List<String> neverAskPermissions);
 }

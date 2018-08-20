@@ -11,16 +11,19 @@ import android.util.SparseArray;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.aliya.permission.PermissionManager.OpEntity.equalsSize;
+
 /**
  * 动态权限申请工具类
  *
  * @author a_liYa
- * @date 16/7/21.
+ * @date 2016/7/21 22:22.
  */
 public class PermissionManager {
     /**
@@ -32,11 +35,7 @@ public class PermissionManager {
 
     private static Context sContext;
 
-    public static void init(Context context) {
-        sContext = context.getApplicationContext();
-    }
-
-    public static PermissionManager get() {
+    private static PermissionManager _get() {
         if (mInstance == null) {
             synchronized (PermissionManager.class) {
                 if (mInstance == null) {
@@ -48,7 +47,7 @@ public class PermissionManager {
     }
 
     private final SparseArray<OpEntity> mRequestCaches;
-    private final Set<String> mManifestPermissions;
+    private Set<String> mManifestPermissions;
 
     // 私有构造方法
     private PermissionManager() {
@@ -68,9 +67,11 @@ public class PermissionManager {
      * @param permissions 权限数组
      * @return true：默认之前已经全部授权
      */
-    public boolean request(Activity activity,
-                           PermissionCallback
-                                   callback, Permission... permissions) {
+    public static boolean request(
+            Activity activity, PermissionCallback callback, Permission... permissions) {
+
+        initContext(activity);
+
         if (permissions == null) // 没有申请的权限 return true
             return true;
 
@@ -79,48 +80,46 @@ public class PermissionManager {
         }
 
         OpEntity opEntity = new OpEntity(callback);
-        // 6.0版本以上
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Set<String> neverAskPerms;
+            Set<String> neverAskPermissions = null;
             for (Permission permission : permissions) { // 权限分类：已授权、已拒绝（不再询问）、待申请
 
                 // 检查申请的权限是否在 AndroidManifest.xml 中
-                if (mManifestPermissions.contains(permission.getPermission())) {
+                if (_get().mManifestPermissions.contains(permission.getPermission())) {
                     //判断权限是否被授予
                     if (checkPermission(permission.getPermission())) {
-                        opEntity.addGrantedPerm(permission.getPermission());
+                        opEntity.addGrantedPermission(permission.getPermission());
                     } else {
-                        neverAskPerms = SPHelper.get(sContext)
-                                .get(PERMISSION_NEVER_ASK, Collections.EMPTY_SET);
-                        if (neverAskPerms.contains(permission.getPermission())) {
+                        if (neverAskPermissions == null) {
+                            neverAskPermissions = getNeverAskPermissions();
+                        }
+                        if (neverAskPermissions.contains(permission.getPermission())) {
                             //  没有被用户禁止弹窗提示
-                            opEntity.addNeverAskPerms(permission.getPermission());
+                            opEntity.addNeverAskPermission(permission.getPermission());
                         } else {
-                            opEntity.addWaitPerms(permission.getPermission());
+                            opEntity.addWaitPermission(permission.getPermission());
                         }
                     }
                 } else {
-                    opEntity.addNeverAskPerms(permission.getPermission());
+                    opEntity.addNeverAskPermission(permission.getPermission());
                 }
             }
 
-            // 处理分类权限
-            if (opEntity.getGrantedPerms().size() == permissions.length) {
+            // 处理 分类权限
+            if (equalsSize(opEntity.grantedPermissions, permissions.length)) {
                 callback.onGranted(true);
                 return true;
             } else {
-                if (opEntity.getWaitPerms().isEmpty()) {
-                    if (opEntity.getGrantedPerms().isEmpty()) { // 全部是已拒绝（不再询问）
-                        callback.onDenied(opEntity.getNeverAskPerms());
+                if (equalsSize(opEntity.waitPermissions, 0)) { // 待申请权限 == 0
+                    if (equalsSize(opEntity.grantedPermissions, 0)) {
+                        // 待申请 == 0 && 已授权 == 0
+                        callback.onDenied(opEntity.neverAskPermissions);
                     } else { // 其他情况：部分拒绝、部分已授权
-                        callback.onElse(opEntity.getDeniedPerms(), opEntity.getNeverAskPerms());
+                        callback.onElse(opEntity.deniedPermissions, opEntity.neverAskPermissions);
                     }
                 } else {
-                    mRequestCaches.put(opEntity.getRequestCode(), opEntity);
-                    RequestHelper.getPermissionOperate(activity)
-                            .exeRequestPermissions(
-                                    opEntity.getWaitPermsArray(), opEntity.getRequestCode());
-                    opEntity.getWaitPerms().clear(); // 清空待申请权限
+                    _get().requestPermission(activity, opEntity);
                 }
             }
         } else {
@@ -131,6 +130,10 @@ public class PermissionManager {
         return false;
     }
 
+    private static Set getNeverAskPermissions() {
+        return SPHelper.get(sContext).get(PERMISSION_NEVER_ASK, Collections.EMPTY_SET);
+    }
+
     /**
      * 权限申请结果处理
      *
@@ -138,16 +141,16 @@ public class PermissionManager {
      * @param permissions  申请权限集合 {@link Permission}
      * @param grantResults 申请结果集合
      */
-    public static void onRequestPermissionsResult(int requestCode, String[]
+    public static void onRequestPermissionResult(int requestCode, String[]
             permissions, int[] grantResults, PermissionOperate showRationale) {
 
-        OpEntity opEntity = get().mRequestCaches.get(requestCode);
+        OpEntity opEntity = _get().mRequestCaches.get(requestCode);
         if (opEntity != null) {
-            get().mRequestCaches.remove(requestCode);
+            _get().mRequestCaches.remove(requestCode);
 
             for (int i = 0; i < permissions.length; i++) {
                 if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {  // 权限被授予
-                    opEntity.addGrantedPerm(permissions[i]);
+                    opEntity.addGrantedPermission(permissions[i]);
                 } else {  // 权限被拒绝 1、拒绝 2、拒绝并不再询问
                     if (!showRationale.exeShouldShowRequestPermissionRationale((permissions[i]))) {
                         SPHelper spHelper = SPHelper.get(sContext);
@@ -155,22 +158,21 @@ public class PermissionManager {
                                 new HashSet<String>());
                         neverAskPerms.add(permissions[i]);
                         spHelper.put(PERMISSION_NEVER_ASK, neverAskPerms);
-                        opEntity.addNeverAskPerms(permissions[i]);
+                        opEntity.addNeverAskPermission(permissions[i]);
                     } else {
-                        opEntity.addDeniedPerm(permissions[i]);
+                        opEntity.addDeniedPermission(permissions[i]);
                     }
                 }
             }
 
-            PermissionCallback callBack = opEntity.getCallBack();
-            if (callBack == null) return;
+            if (opEntity.callback == null) return;
 
-            if (opEntity.getDeniedPerms().isEmpty()) {
-                callBack.onGranted(false);
-            } else if (opEntity.getGrantedPerms().isEmpty()) {
-                callBack.onDenied(opEntity.getNeverAskPerms());
+            if (equalsSize(opEntity.deniedPermissions, 0)) {
+                opEntity.callback.onGranted(false);
+            } else if (equalsSize(opEntity.grantedPermissions, 0)) {
+                opEntity.callback.onDenied(opEntity.neverAskPermissions);
             } else {
-                callBack.onElse(opEntity.getDeniedPerms(), opEntity.getNeverAskPerms());
+                opEntity.callback.onElse(opEntity.deniedPermissions, opEntity.neverAskPermissions);
             }
         }
     }
@@ -181,7 +183,7 @@ public class PermissionManager {
      * @param permission
      * @return true: 已经授权
      */
-    public static boolean checkPermission(String permission) {
+    static boolean checkPermission(String permission) {
         boolean result = true;
         int targetSdkVersion = 0;
         Context ctx = sContext;
@@ -203,11 +205,13 @@ public class PermissionManager {
         return result;
     }
 
+    private static void initContext(Context context) {
+        if (sContext == null && context != null) {
+            sContext = context.getApplicationContext();
+        }
+    }
 
-    /**
-     * 获取Manifest静态注册的权限
-     */
-    private synchronized Set<String> getManifestPermissions() {
+    private Set<String> getManifestPermissions() {
 
         Set<String> manifestPermissions = null;
         PackageInfo packageInfo = null;
@@ -219,18 +223,21 @@ public class PermissionManager {
         }
         if (packageInfo != null) {
             String[] permissions = packageInfo.requestedPermissions;
-            if (permissions != null) {
-                manifestPermissions = new HashSet<>(permissions.length);
-                for (String perm : permissions) {
-                    manifestPermissions.add(perm);
-                }
+            if (permissions != null && permissions.length != 0) {
+                manifestPermissions = new HashSet<>(Arrays.asList(permissions));
             }
         }
 
-        if (manifestPermissions == null) manifestPermissions = new HashSet<>(0);
-
-        return manifestPermissions;
+        return manifestPermissions != null ? manifestPermissions : new HashSet<String>(0);
     }
+
+    private void requestPermission(Activity activity, OpEntity opEntity) {
+        mRequestCaches.put(opEntity.requestCode, opEntity);
+        PermissionOperate operate = RequestHelper.getPermissionOperate(activity);
+        operate.exeRequestPermissions(opEntity.getWaitPermsArray(), opEntity.requestCode);
+        opEntity.waitPermissions = null;
+    }
+
 
     /**
      * 用来存储权限相关数据
@@ -238,98 +245,61 @@ public class PermissionManager {
      * @author a_liYa
      * @date 2016/9/18 11:08.
      */
-    private static class OpEntity implements Serializable {
-        /**
-         * 授权权限集合
-         */
-        private List<String> mGrantedPerms;
-        /**
-         * 拒绝权限集合 包括：不再询问权限
-         */
-        private List<String> mDeniedPerms;
-        /**
-         * 不再询问权限集合
-         */
-        private List<String> mNeverAskPerms;
-        /**
-         * 待申请权限集合
-         */
-        private List<String> mWaitPerms;
+    static class OpEntity implements Serializable {
 
-        private PermissionCallback mCallBack;
+        List<String> grantedPermissions;   // 授权权限集合
+        List<String> deniedPermissions;    // 拒绝权限集合 包括：不再询问权限
+        List<String> neverAskPermissions;  // 不再询问权限集合
+        List<String> waitPermissions;      // 待申请权限集合
 
-        private int requestCode;
+        PermissionCallback callback;
 
-        private static int count = 0;
+        int requestCode;
 
-        public OpEntity(PermissionCallback callBack) {
-            mCallBack = callBack;
-            mGrantedPerms = new ArrayList<>();
-            mDeniedPerms = new ArrayList<>();
-            mNeverAskPerms = new ArrayList<>();
-            mWaitPerms = new ArrayList<>();
+        static int count = 0;   // 用来生成 requestCode
+
+        OpEntity(PermissionCallback callback) {
+            this.callback = callback;
+
             requestCode = count++;
             if (count > 0x0000ffff) {
                 count = 0;
             }
         }
 
-        public PermissionCallback getCallBack() {
-            return mCallBack;
+        void addGrantedPermission(String permission) {
+            if (grantedPermissions == null) grantedPermissions = new ArrayList<>();
+
+            grantedPermissions.add(permission);
         }
 
-        public void setCallBack(PermissionCallback callBack) {
-            mCallBack = callBack;
+        void addDeniedPermission(String permission) {
+            if (deniedPermissions == null) deniedPermissions = new ArrayList<>();
+
+            deniedPermissions.add(permission);
         }
 
-        public List<String> getGrantedPerms() {
-            return mGrantedPerms;
+        void addNeverAskPermission(String permission) {
+            if (neverAskPermissions == null) neverAskPermissions = new ArrayList<>();
+
+            neverAskPermissions.add(permission);
+            addDeniedPermission(permission);
         }
 
-        public void setGrantedPerms(List<String> grantedPerms) {
-            mGrantedPerms = grantedPerms;
+        void addWaitPermission(String permission) {
+            if (waitPermissions == null) waitPermissions = new ArrayList<>();
+
+            waitPermissions.add(permission);
         }
 
-        public void addGrantedPerm(String grantedPerm) {
-            mGrantedPerms.add(grantedPerm);
+        String[] getWaitPermsArray() {
+            return waitPermissions.toArray(new String[waitPermissions.size()]);
         }
 
-        public List<String> getDeniedPerms() {
-            return mDeniedPerms;
+        public static boolean equalsSize(List list, int size) {
+            return (list != null ? list.size() : 0) == size;
         }
 
-        public void addDeniedPerm(String deniedPerm) {
-            mDeniedPerms.add(deniedPerm);
-        }
-
-        public void setDeniedPerms(List<String> deniedPerms) {
-            mDeniedPerms = deniedPerms;
-        }
-
-        public List<String> getNeverAskPerms() {
-            return mNeverAskPerms;
-        }
-
-        public void addNeverAskPerms(String neverAskPerm) {
-            mNeverAskPerms.add(neverAskPerm);
-            mDeniedPerms.add(neverAskPerm);
-        }
-
-        public List<String> getWaitPerms() {
-            return mWaitPerms;
-        }
-
-        public void addWaitPerms(String requestPerm) {
-            mWaitPerms.add(requestPerm);
-        }
-
-        public String[] getWaitPermsArray() {
-            return mWaitPerms.toArray(new String[mWaitPerms.size()]);
-        }
-
-        public int getRequestCode() {
-            return requestCode;
-        }
     }
 
 }

@@ -111,7 +111,7 @@ public enum Permission {
     }
 
     /**
-     * 是否为指定权限
+     * 判断参数 permission 是否为当前权限
      *
      * @param permission 指定权限
      * @return true / false

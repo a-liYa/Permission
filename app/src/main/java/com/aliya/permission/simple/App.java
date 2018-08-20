@@ -2,8 +2,6 @@ package com.aliya.permission.simple;
 
 import android.app.Application;
 
-import com.aliya.permission.PermissionManager;
-
 /**
  * App
  *
@@ -15,8 +13,6 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        PermissionManager.init(this);
     }
 
 }
