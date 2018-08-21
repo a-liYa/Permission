@@ -3,6 +3,8 @@ package com.aliya.permission;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -19,6 +21,16 @@ import android.util.SparseArray;
 final class RequestHelper {
 
     private static final String FRAGMENT_TAG = "request_fragment_tag";
+
+    public static Activity getActivityByContext(Context context) {
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity) context;
+            }
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return null;
+    }
 
     public static PermissionOperate getPermissionOperate(Activity activity) {
         FragmentManager manager = activity.getFragmentManager();
@@ -61,7 +73,8 @@ final class RequestHelper {
         public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                                @NonNull int[] grantResults) {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-            PermissionManager.onRequestPermissionResult(requestCode, permissions, grantResults, this);
+            PermissionManager.onRequestPermissionResult(requestCode, permissions, grantResults,
+                    this);
         }
 
         @RequiresApi(api = Build.VERSION_CODES.M)
@@ -84,5 +97,5 @@ final class RequestHelper {
         }
 
     }
-    
+
 }

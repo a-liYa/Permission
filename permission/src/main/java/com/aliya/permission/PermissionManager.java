@@ -59,6 +59,21 @@ public class PermissionManager {
      * <p/>
      * 注：所申请权限必须在Manifest中静态注册，否则可能崩溃
      *
+     * @param context     context
+     * @param callback    回调
+     * @param permissions 权限数组
+     * @return true：默认之前已经全部授权
+     */
+    public static boolean request(
+            Context context, PermissionCallback callback, Permission... permissions) {
+        return request(RequestHelper.getActivityByContext(context), callback, permissions);
+    }
+
+    /**
+     * 动态申请权限
+     * <p/>
+     * 注：所申请权限必须在Manifest中静态注册，否则可能崩溃
+     *
      * @param activity    activity
      * @param callback    回调
      * @param permissions 权限数组
@@ -133,7 +148,7 @@ public class PermissionManager {
      * @param permissions  申请权限集合 {@link Permission}
      * @param grantResults 申请结果集合
      */
-    public static void onRequestPermissionResult(int requestCode, String[]
+    static void onRequestPermissionResult(int requestCode, String[]
             permissions, int[] grantResults, PermissionOperate showRationale) {
 
         OpEntity opEntity = _get().mRequestCaches.get(requestCode);
@@ -187,7 +202,7 @@ public class PermissionManager {
      */
     static boolean checkPermission(String permission) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // 对比 PermissionChecker.checkSelfPermission(ctx, permission)
+            // 对比 PermissionChecker.checkSelfPermission(sContext, permission)
             return ContextCompat.checkSelfPermission(sContext, permission) == PackageManager
                     .PERMISSION_GRANTED;
         }
