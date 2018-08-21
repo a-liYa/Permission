@@ -139,8 +139,8 @@ public class PermissionManager {
      * @param permissions  申请权限集合 {@link Permission}
      * @param grantResults 申请结果集合
      */
-    static void onRequestPermissionResult(int requestCode, String[]
-            permissions, int[] grantResults, PermissionOperate showRationale) {
+    static void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults,
+                                          PermissionOperate showRationale) {
 
         OpEntity opEntity = _get().mRequestCaches.get(requestCode);
         if (opEntity != null) {
