@@ -70,7 +70,7 @@ public class PermissionManager {
 
     /**
      * 动态申请权限
-     * <p/>
+     * <p>
      * 注：所申请权限必须在Manifest中静态注册，否则可能崩溃
      *
      * @param activity    activity

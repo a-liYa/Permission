@@ -16,7 +16,7 @@ public enum Permission {
      * permission:android.permission.WRITE_CONTACTS
      * permission:android.permission.GET_ACCOUNTS
      * permission:android.permission.READ_CONTACTS
-     * <p/>
+     * <p>
      * group:android.permission-group.PHONE
      * permission:android.permission.READ_CALL_LOG
      * permission:android.permission.READ_PHONE_STATE
@@ -25,28 +25,28 @@ public enum Permission {
      * permission:android.permission.USE_SIP
      * permission:android.permission.PROCESS_OUTGOING_CALLS
      * permission:com.android.voicemail.permission.ADD_VOICEMAIL
-     * <p/>
+     * <p>
      * group:android.permission-group.CALENDAR
      * permission:android.permission.READ_CALENDAR
      * permission:android.permission.WRITE_CALENDAR
-     * <p/>
+     * <p>
      * group:android.permission-group.CAMERA
      * permission:android.permission.CAMERA
-     * <p/>
+     * <p>
      * group:android.permission-group.SENSORS
      * permission:android.permission.BODY_SENSORS
-     * <p/>
+     * <p>
      * group:android.permission-group.LOCATION
      * permission:android.permission.ACCESS_FINE_LOCATION
      * permission:android.permission.ACCESS_COARSE_LOCATION
-     * <p/>
+     * <p>
      * group:android.permission-group.STORAGE
      * permission:android.permission.READ_EXTERNAL_STORAGE
      * permission:android.permission.WRITE_EXTERNAL_STORAGE
-     * <p/>
+     * <p>
      * group:android.permission-group.MICROPHONE
      * permission:android.permission.RECORD_AUDIO
-     * <p/>
+     * <p>
      * group:android.permission-group.SMS
      * permission:android.permission.READ_SMS
      * permission:android.permission.RECEIVE_WAP_PUSH

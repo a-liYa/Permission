@@ -19,7 +19,15 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    compileOnly 'com.android.support:appcompat-v7:27.1.1'
 }
+
+ext {
+    publishArtifact = 'permission'
+    publishVersion = '0.0.1'
+    publishDesc = 'Android 权限申请工具类'
+    publishWebsite = 'https://github.com/a-liYa/Permission'
+}
+
+apply from: "${rootDir}/publish.gradle"
