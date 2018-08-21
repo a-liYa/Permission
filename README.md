@@ -1,6 +1,13 @@
 # Permission
 Android 权限申请 工具类，一行代码即可申请权限
 
+## 依赖
+```
+dependencies {
+    implementation 'com.aliya:permission:0.0.1'
+}
+```
+
 ### 什么时候需要手动进入应用权限设置页 ？
 
 同时满足以下两个条件：
