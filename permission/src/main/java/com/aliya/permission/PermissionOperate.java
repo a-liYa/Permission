@@ -21,7 +21,13 @@ interface PermissionOperate {
     void exeRequestPermissions(@NonNull String[] permissions, int requestCode);
 
     /**
-     * 实现Activity、Fragment#shouldShowRequestPermissionRationale 功能
+     * 告诉我们是否应该向用户展示自定义UI解释请求权限的原因
+     * 1、请求权限之前，返回false；
+     * 2、请求权限被允许之后，返回false；
+     * 3、请求权限被拒绝之后，返回true；
+     * 4、请求权限被拒绝(且勾选不在询问)之后，返回false；
+     * <p>
+     * 代理Activity、Fragment#shouldShowRequestPermissionRationale 功能
      *
      * @param permission 权限
      * @return true会弹窗提醒，false不在显示提醒

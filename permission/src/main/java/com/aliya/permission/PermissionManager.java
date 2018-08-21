@@ -11,7 +11,6 @@ import android.util.SparseArray;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +27,6 @@ import static com.aliya.permission.PermissionManager.OpEntity.equalsSize;
 public class PermissionManager {
 
     private static final int EMPTY = 0;
-    private static final String PERMISSION_NEVER_ASK = "permission_never_ask_sets";
 
     private volatile static PermissionManager mInstance;
 
@@ -56,13 +54,12 @@ public class PermissionManager {
 
     /**
      * 动态申请权限
-     * <p/>
-     * 注：所申请权限必须在Manifest中静态注册，否则可能崩溃
      *
      * @param context     context
      * @param callback    回调
      * @param permissions 权限数组
      * @return true：默认之前已经全部授权
+     * @see #request(Activity, PermissionCallback, Permission...)
      */
     public static boolean request(
             Context context, PermissionCallback callback, Permission... permissions) {
@@ -94,8 +91,7 @@ public class PermissionManager {
         OpEntity opEntity = new OpEntity(callback);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Set<String> neverAskPermissions = null;
-            for (Permission permission : permissions) { // 权限分类：已授权、已拒绝（不再询问）、待申请
+            for (Permission permission : permissions) { // 权限分类：已授权、待申请
 
                 // 检查申请的权限是否在 AndroidManifest.xml 中
                 if (_get().mManifestPermissions.contains(permission.getPermission())) {
@@ -103,14 +99,7 @@ public class PermissionManager {
                     if (checkPermission(permission.getPermission())) {
                         opEntity.addGrantedPermission(permission.getPermission());
                     } else {
-                        if (neverAskPermissions == null) {
-                            neverAskPermissions = getNeverAskPermissions(Collections.EMPTY_SET);
-                        }
-                        if (neverAskPermissions.contains(permission.getPermission())) {
-                            opEntity.addNeverAskPermission(permission.getPermission());
-                        } else {
-                            opEntity.addWaitPermission(permission.getPermission());
-                        }
+                        opEntity.addWaitPermission(permission.getPermission());
                     }
                 } else {
                     opEntity.addNeverAskPermission(permission.getPermission());
@@ -155,27 +144,18 @@ public class PermissionManager {
         if (opEntity != null) {
             _get().mRequestCaches.remove(requestCode);
 
-            Set<String> neverAskPermissions = null;
             for (int i = 0; i < permissions.length; i++) {
                 if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {  // 权限被授予
                     opEntity.addGrantedPermission(permissions[i]);
                 } else { // 权限被拒绝
                     if (!showRationale.exeShouldShowRequestPermissionRationale((permissions[i]))) {
                         // 1、拒绝且不再询问
-                        if (neverAskPermissions == null) {
-                            neverAskPermissions = getNeverAskPermissions(new HashSet<String>());
-                        }
-                        neverAskPermissions.add(permissions[i]);
                         opEntity.addNeverAskPermission(permissions[i]);
                     } else {
                         // 2、拒绝
                         opEntity.addDeniedPermission(permissions[i]);
                     }
                 }
-            }
-
-            if (neverAskPermissions != null) { // 保存至本地
-                SPHelper.get(sContext).put(PERMISSION_NEVER_ASK, neverAskPermissions).commit();
             }
 
             if (opEntity.callback == null) return;
@@ -188,10 +168,6 @@ public class PermissionManager {
                 opEntity.callback.onElse(opEntity.deniedPermissions, opEntity.neverAskPermissions);
             }
         }
-    }
-
-    static Set getNeverAskPermissions(Set<String> defValue) {
-        return SPHelper.get(sContext).get(PERMISSION_NEVER_ASK, defValue);
     }
 
     /**

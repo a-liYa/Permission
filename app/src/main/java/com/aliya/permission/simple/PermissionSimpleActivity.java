@@ -1,7 +1,7 @@
 package com.aliya.permission.simple;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.aliya.permission.Permission;
@@ -11,7 +11,7 @@ import com.aliya.permission.simple.utils.T;
 
 import java.util.List;
 
-public class PermissionSimpleActivity extends Activity implements View.OnClickListener {
+public class PermissionSimpleActivity extends AppCompatActivity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
