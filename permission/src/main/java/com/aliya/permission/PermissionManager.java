@@ -2,9 +2,12 @@ package com.aliya.permission;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.util.SparseArray;
 
@@ -46,7 +49,6 @@ public class PermissionManager {
     private final SparseArray<OpEntity> mRequestCaches;
     private final Set<String> mManifestPermissions;
 
-    // 私有构造方法
     private PermissionManager() {
         mRequestCaches = new SparseArray<>();
         mManifestPermissions = getManifestPermissions();
@@ -183,6 +185,18 @@ public class PermissionManager {
                     .PERMISSION_GRANTED;
         }
         return true;
+    }
+
+    /**
+     * 开启应用的设置页面
+     */
+    public static void startSettingIntent() {
+        if (sContext != null) {
+            Intent setting = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            setting.setData(Uri.parse("package:" + sContext.getPackageName()));
+            setting.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            sContext.startActivity(setting);
+        }
     }
 
     private static void initContext(Context context) {
