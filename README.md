@@ -42,14 +42,20 @@ dependencies {
 ## 请求权限 - 重载方法
 
 ```
-boolean request(Context context, PermissionCallback callback, String... permissions);
 
-boolean request(Activity activity, PermissionCallback callback, String... permissions);
+boolean request(Context context, PermissionCallback callback, String... permissions);       // (1)
 
-boolean request(Context context, PermissionCallback callback, Permission... permissions);
+boolean request(Activity activity, PermissionCallback callback, String... permissions);     // (2)
 
-boolean request(Activity activity, PermissionCallback callback, Permission... permissions);
+boolean request(Context context, PermissionCallback callback, Permission... permissions);   // (3)
 
+boolean request(Activity activity, PermissionCallback callback, Permission... permissions); // (4)
+
+```
+
+注意：
+```
+所有危险权限均已在枚举类Permission中声明，危险权限建议使用方法(3)(4)申请，普通权限因没有在Permission中声明，所以必须使用方法(1)(2)申请；
 ```
 
 ## 申请单个权限
