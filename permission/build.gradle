@@ -1,12 +1,15 @@
 apply plugin: 'com.android.library'
 
+def vCode = 100
+def vName = '1.0.0'
+
 android {
     compileSdkVersion 27
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+        versionCode vCode
+        versionName vName
     }
 
     buildTypes {
@@ -25,7 +28,7 @@ dependencies {
 
 ext {
     publishArtifact = 'permission'
-    publishVersion = '0.0.1'
+    publishVersion = vName
     publishDesc = 'Android 权限申请工具类'
     publishWebsite = 'https://github.com/a-liYa/Permission'
 }
