@@ -55,17 +55,40 @@ public class PermissionManager {
     }
 
     /**
-     * 动态申请权限
+     * 动态权限申请
      *
-     * @param context     context
+     * @param context     context not instanceof Application
      * @param callback    回调
-     * @param permissions 权限数组
-     * @return true：默认之前已经全部授权
-     * @see #request(Activity, PermissionCallback, Permission...)
+     * @param permissions 权限集
+     * @return true：权限申请之前已全部允许
+     * @see #request(Activity, PermissionCallback, String...)
+     */
+    public static boolean request(
+            Context context, PermissionCallback callback, String... permissions) {
+        return request(RequestHelper.getActivityByContext(context), callback, permissions);
+    }
+
+    public static boolean request(
+            Activity activity, PermissionCallback callback, String... permissions) {
+        return request(activity, callback, null, permissions);
+    }
+
+    /**
+     * 动态权限申请
+     *
+     * @param context     context not instanceof Application
+     * @param callback    回调
+     * @param permissions 权限集
+     * @return true：权限申请之前已全部允许
      */
     public static boolean request(
             Context context, PermissionCallback callback, Permission... permissions) {
         return request(RequestHelper.getActivityByContext(context), callback, permissions);
+    }
+
+    public static boolean request(
+            Activity activity, PermissionCallback callback, Permission... permissions) {
+        return request(activity, callback, permissions, null);
     }
 
     /**
@@ -75,41 +98,43 @@ public class PermissionManager {
      *
      * @param activity    activity
      * @param callback    回调
-     * @param permissions 权限数组
-     * @return true：默认之前已经全部授权
+     * @param permissions 权限集
+     * @return true：权限申请之前已全部允许
      */
-    public static boolean request(
-            Activity activity, PermissionCallback callback, Permission... permissions) {
+    private static boolean request(Activity activity, PermissionCallback callback,
+                                   Permission[] permissions, String[] permissionArray) {
 
         initContext(activity);
 
-        if (permissions == null || permissions.length == EMPTY) // 没有申请的权限 return true
-            return true;
+        int length = EMPTY;
+        if (permissions != null) length += permissions.length;
+        if (permissionArray != null) length += permissionArray.length;
 
-        if (activity == null || callback == null) {
+        // 没有申请的权限
+        if (length == EMPTY || activity == null || callback == null) {
             return false;
         }
 
         OpEntity opEntity = new OpEntity(callback);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            for (Permission permission : permissions) { // 权限分类：已授权、待申请
-
-                // 检查申请的权限是否在 AndroidManifest.xml 中
-                if (_get().mManifestPermissions.contains(permission.getPermission())) {
-                    // 判断权限是否被授予
-                    if (checkPermission(permission.getPermission())) {
-                        opEntity.addGrantedPermission(permission.getPermission());
-                    } else {
-                        opEntity.addWaitPermission(permission.getPermission());
+            // 权限分类：已授权、待申请
+            {
+                if (permissions != null) {
+                    for (Permission permission : permissions) {
+                        assortPermission(opEntity, permission.getPermission());
                     }
-                } else {
-                    opEntity.addNeverAskPermission(permission.getPermission());
+                }
+
+                if (permissionArray != null) {
+                    for (String permission : permissionArray) {
+                        assortPermission(opEntity, permission);
+                    }
                 }
             }
 
             // 处理 分类权限
-            if (equalsSize(opEntity.grantedPermissions, permissions.length)) {
+            if (equalsSize(opEntity.grantedPermissions, length)) {
                 callback.onGranted(true);
                 return true;
             } else {
@@ -128,7 +153,6 @@ public class PermissionManager {
             callback.onGranted(true);
             return true;
         }
-
         return false;
     }
 
@@ -169,6 +193,26 @@ public class PermissionManager {
             } else {
                 opEntity.callback.onElse(opEntity.deniedPermissions, opEntity.neverAskPermissions);
             }
+        }
+    }
+
+    /**
+     * 权限区分归类
+     *
+     * @param opEntity   .
+     * @param permission 权限名称
+     */
+    static void assortPermission(OpEntity opEntity, String permission) {
+        // 检查申请的权限是否在 AndroidManifest.xml 中
+        if (_get().mManifestPermissions.contains(permission)) {
+            // 判断权限是否被授予
+            if (checkPermission(permission)) {
+                opEntity.addGrantedPermission(permission);
+            } else {
+                opEntity.addWaitPermission(permission);
+            }
+        } else {
+            opEntity.addNeverAskPermission(permission);
         }
     }
 

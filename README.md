@@ -14,3 +14,6 @@ dependencies {
 > 1、请求权限之前判断: `shouldShowRequestPermissionRationale() == false`；
 
 > 2、请求权限拒绝之后判断: `shouldShowRequestPermissionRationale() == false`;
+
+
+### Manifest.permission.REQUEST_INSTALL_PACKAGES
