@@ -1,5 +1,6 @@
 package com.aliya.permission;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.List;
@@ -31,5 +32,5 @@ public interface PermissionCallback {
      * @param deniedPermissions   被拒绝权限集合(包括不再询问)
      * @param neverAskPermissions 被拒绝(不再询问)权限集合
      */
-    void onElse(@Nullable List<String> deniedPermissions, @Nullable List<String> neverAskPermissions);
+    void onElse(@NonNull List<String> deniedPermissions, @Nullable List<String> neverAskPermissions);
 }
