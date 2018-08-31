@@ -38,8 +38,8 @@ public class PermissionSimpleActivity extends AppCompatActivity implements View.
         PermissionManager.request(this, new PermissionCallback() {
 
             @Override
-            public void onGranted(boolean isAlreadyDef) {
-                T.showShort(getBaseContext(), "通过： " + (isAlreadyDef ? "二次" : "首次"));
+            public void onGranted(boolean isAlready) {
+                T.showShort(getBaseContext(), "通过： " + (isAlready ? "二次" : "首次"));
             }
 
             @Override
@@ -59,8 +59,8 @@ public class PermissionSimpleActivity extends AppCompatActivity implements View.
         PermissionManager.request(this, new PermissionCallback() {
 
             @Override
-            public void onGranted(boolean isAlreadyDef) {
-                T.showShort(getBaseContext(), "通过： " + (isAlreadyDef ? "二次" : "首次"));
+            public void onGranted(boolean isAlready) {
+                T.showShort(getBaseContext(), "通过： " + (isAlready ? "二次" : "首次"));
             }
 
             @Override

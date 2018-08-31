@@ -77,17 +77,17 @@ new AbsPermissionCallback() {
 
 ## Callback 详解
 
-1. onGranted(boolean isAlreadyDef)
+### 1. onGranted(boolean isAlreadyDef)
 
     全部授权（包括申请多个权限），isAlreadyDef == true，表示申请之前已经被授权；授权权限集合即为请求权限的集合。
 
 
-2. onDenied(@Nullable List<String> neverAskPermissions)
+### 2. onDenied(@Nullable List<String> neverAskPermissions)
 
     全部拒绝（包括不再询问），neverAskPermissions **可能为null**，表示勾选不再询问的权限集合；拒绝权限集合（包括不再询问）即为请求权限的集合。
 
 
-3. onElse(@NonNull List<String> deniedPermissions, @Nullable List<String> neverAskPermissions)
+### 3. onElse(@NonNull List<String> deniedPermissions, @Nullable List<String> neverAskPermissions)
 
     部分授权，部分拒绝，单权限申请不存在此情况；deniedPermissions 被拒绝权限的集合（包括不再询问）；授权权限集合 = 请求权限集合 - 拒绝权限集合；
 
@@ -98,7 +98,7 @@ new AbsPermissionCallback() {
 
 同时满足以下两个条件：
 > 1、请求权限之前判断: `shouldShowRequestPermissionRationale() == false`；
-
+>
 > 2、请求权限拒绝之后判断: `shouldShowRequestPermissionRationale() == false`;
 
 示例：
@@ -116,4 +116,4 @@ manifest配置：
 
 `<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />`
 
- **当主动申请该权限时，永远返回拒绝（这里比较特殊）** 可通过 context.getPackageManager().canRequestPackageInstalls() 来判断使用具备该权限；
+ **当主动申请该权限时，永远返回拒绝（这里比较特殊）；** 可通过 context.getPackageManager().canRequestPackageInstalls() 来判断是否具备该权限；
