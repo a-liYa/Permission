@@ -3,11 +3,13 @@ package com.aliya.permission;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.SparseArray;
 
@@ -34,6 +36,11 @@ public class PermissionManager {
     private volatile static PermissionManager mInstance;
 
     private static Context sContext;
+
+    /**
+     * @see /build.gradle文件 属性android.buildTypes.(release/debug)#debuggable true/false 来决定
+     */
+    private static boolean sDebuggable = false;
 
     private static PermissionManager _get() {
         if (mInstance == null) {
@@ -111,7 +118,10 @@ public class PermissionManager {
         if (permissionArray != null) length += permissionArray.length;
 
         // 没有申请的权限
-        if (length == EMPTY || activity == null || callback == null) {
+        if (length == EMPTY || activity == null) {
+            if (activity == null && sDebuggable) {
+                throw new IllegalArgumentException("activity shouldn't be null");
+            }
             return false;
         }
 
@@ -135,22 +145,24 @@ public class PermissionManager {
 
             // 处理 分类权限
             if (equalsSize(opEntity.grantedPermissions, length)) {
-                callback.onGranted(true);
+                if (callback != null) callback.onGranted(true);
                 return true;
             } else {
                 if (equalsSize(opEntity.waitPermissions, EMPTY)) { // 待申请权限 == 0
-                    if (equalsSize(opEntity.grantedPermissions, EMPTY)) {
-                        // 待申请 == 0 && 已授权 == 0
-                        callback.onDenied(opEntity.neverAskPermissions);
-                    } else { // 其他情况：部分拒绝、部分已授权
-                        callback.onElse(opEntity.deniedPermissions, opEntity.neverAskPermissions);
+                    if (callback != null){
+                        if (equalsSize(opEntity.grantedPermissions, EMPTY)) {
+                            // 待申请 == 0 && 已授权 == 0
+                            callback.onDenied(opEntity.neverAskPermissions);
+                        } else { // 其他情况：部分拒绝、部分已授权
+                            callback.onElse(opEntity.deniedPermissions, opEntity.neverAskPermissions);
+                        }
                     }
                 } else {
                     _get().requestPermission(activity, opEntity);
                 }
             }
         } else {
-            callback.onGranted(true);
+            if (callback != null) callback.onGranted(true);
             return true;
         }
         return false;
@@ -195,6 +207,21 @@ public class PermissionManager {
             }
         }
     }
+
+    public static boolean shouldShowRequestPermissionRationale(Context context,
+                                                               @NonNull String permission) {
+        initContext(context);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Activity activity = RequestHelper.getActivityByContext(context);
+            if (activity != null) {
+                return activity.shouldShowRequestPermissionRationale(permission);
+            } else if (sDebuggable){
+                throw new IllegalArgumentException("context is not instanceof Activity");
+            }
+        }
+        return false;
+    }
+
 
     /**
      * 权限区分归类
@@ -246,6 +273,12 @@ public class PermissionManager {
     private static void initContext(Context context) {
         if (sContext == null && context != null) {
             sContext = context.getApplicationContext();
+            try {
+                sDebuggable =
+                        (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+            } catch (Exception e) {
+                sDebuggable = false;
+            }
         }
     }
 

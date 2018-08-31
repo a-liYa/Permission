@@ -15,9 +15,9 @@ public interface PermissionCallback {
     /**
      * 全部授予
      *
-     * @param isAlreadyDef 申请之前已全部默认授权
+     * @param isAlready 申请之前已全部默认授权
      */
-    void onGranted(boolean isAlreadyDef);
+    void onGranted(boolean isAlready);
 
     /**
      * 全部拒绝 包括不再询问权限

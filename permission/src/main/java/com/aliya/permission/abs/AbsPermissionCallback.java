@@ -13,7 +13,7 @@ import java.util.List;
 public abstract class AbsPermissionCallback implements PermissionCallback {
 
     @Override
-    public void onGranted(boolean isAlreadyDef) {
+    public void onGranted(boolean isAlready) {
     }
 
     @Override
