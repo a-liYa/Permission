@@ -57,7 +57,7 @@ public class NeverAskActivity extends AppCompatActivity implements View.OnClickL
                         (NeverAskActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION);
                 if (!before && !after) {
                     // 此处应该Dialog提醒
-                    startActivityForResult(PermissionManager.getSettingIntent(getPackageName()), 100);
+                    startActivityForResult(PermissionManager.getSettingIntent(getApplication()), 100);
                 }
             }
 

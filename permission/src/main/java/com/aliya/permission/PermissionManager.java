@@ -65,7 +65,7 @@ public class PermissionManager {
     /**
      * 动态权限申请
      *
-     * @param context     context not instanceof Application
+     * @param context     should be include activity.
      * @param callback    回调
      * @param permissions 权限集
      * @return true：权限申请之前已全部允许
@@ -84,7 +84,7 @@ public class PermissionManager {
     /**
      * 动态权限申请
      *
-     * @param context     context not instanceof Application
+     * @param context     should be include activity.
      * @param callback    回调
      * @param permissions 权限集
      * @return true：权限申请之前已全部允许
@@ -252,7 +252,7 @@ public class PermissionManager {
     /**
      * 检查权限是否已经授权
      *
-     * @param context    context
+     * @param context    a any context
      * @param permission 被检查权限
      * @return true: 已授权
      */
@@ -268,12 +268,12 @@ public class PermissionManager {
     /**
      * 获取应用设置页面的 Intent
      *
-     * @param packageName 包名
+     * @param context a any context
      * @return intent
      */
-    public static Intent getSettingIntent(String packageName) {
+    public static Intent getSettingIntent(Context context) {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        intent.setData(Uri.parse("package:" + packageName));
+        intent.setData(Uri.parse("package:" + context.getPackageName()));
         return intent;
     }
 
