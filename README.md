@@ -147,7 +147,12 @@ manifest配置：
  **当主动申请该权限时，永远返回拒绝（这里比较特殊）；** 可通过 context.getPackageManager().canRequestPackageInstalls() 来判断是否具备该权限；
 
 
-### 3. 待优化
+### 3. Android 9.0 前台服务权限
+
+针对 Android P 或更高平台开发的应用必须请求 Manifest.permission.FOREGROUND_SERVICE 权限才能使用前台服务。 Manifest.permission.FOREGROUND_SERVICE 属于普通级别请求，因此提出请求后，系统会自动授予。
+
+
+### 4. 待优化
 
 优化 ApplicationContext 的获取
 
