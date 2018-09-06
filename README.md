@@ -145,3 +145,13 @@ manifest配置：
 `<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />`
 
  **当主动申请该权限时，永远返回拒绝（这里比较特殊）；** 可通过 context.getPackageManager().canRequestPackageInstalls() 来判断是否具备该权限；
+
+
+### 3. 待优化
+
+优化 ApplicationContext 的获取
+
+减少 context 参数
+eg：`PermissionManager#checkPermission(context, permission); PermissionManager#getSettingIntent(context);`
+
+参考 http://kaedea.com/2017/04/09/android/global-accessing-context/#more
