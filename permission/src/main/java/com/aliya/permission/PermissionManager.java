@@ -35,12 +35,13 @@ public class PermissionManager {
 
     private volatile static PermissionManager mInstance;
 
+    private static int sCode = 0;   // 用来生成 requestCode
     private static Context sContext;
 
     /**
      * @see /build.gradle文件 属性android.buildTypes.(release/debug)#debuggable true/false 来决定
      */
-    private static boolean sDebuggable = false;
+    static boolean sDebuggable = false;
 
     private static PermissionManager _get() {
         if (mInstance == null) {
@@ -120,7 +121,7 @@ public class PermissionManager {
         // 没有申请的权限
         if (length == EMPTY || activity == null) {
             if (activity == null && sDebuggable) {
-                throw new IllegalArgumentException("activity shouldn't be null");
+                throw new IllegalArgumentException("activity shouldn't be null.");
             }
             return false;
         }
@@ -149,12 +150,13 @@ public class PermissionManager {
                 return true;
             } else {
                 if (equalsSize(opEntity.waitPermissions, EMPTY)) { // 待申请权限 == 0
-                    if (callback != null){
+                    if (callback != null) {
                         if (equalsSize(opEntity.grantedPermissions, EMPTY)) {
                             // 待申请 == 0 && 已授权 == 0
                             callback.onDenied(opEntity.neverAskPermissions);
                         } else { // 其他情况：部分拒绝、部分已授权
-                            callback.onElse(opEntity.deniedPermissions, opEntity.neverAskPermissions);
+                            callback.onElse(opEntity.deniedPermissions, opEntity
+                                    .neverAskPermissions);
                         }
                     }
                 } else {
@@ -215,8 +217,6 @@ public class PermissionManager {
             Activity activity = RequestHelper.getActivityByContext(context);
             if (activity != null) {
                 return activity.shouldShowRequestPermissionRationale(permission);
-            } else if (sDebuggable){
-                throw new IllegalArgumentException("context is not instanceof Activity");
             }
         }
         return false;
@@ -233,7 +233,7 @@ public class PermissionManager {
         // 检查申请的权限是否在 AndroidManifest.xml 中
         if (_get().mManifestPermissions.contains(permission)) {
             // 判断权限是否被授予
-            if (checkPermission(permission)) {
+            if (checkPermission(sContext, permission)) {
                 opEntity.addGrantedPermission(permission);
             } else {
                 opEntity.addWaitPermission(permission);
@@ -246,31 +246,32 @@ public class PermissionManager {
     /**
      * 检查权限是否已经授权
      *
+     * @param context    context
      * @param permission 被检查权限
      * @return true: 已授权
      */
-    static boolean checkPermission(String permission) {
+    public static boolean checkPermission(Context context, String permission) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // 对比 PermissionChecker.checkSelfPermission(sContext, permission)
-            return ContextCompat.checkSelfPermission(sContext, permission) == PackageManager
+            return ContextCompat.checkSelfPermission(context, permission) == PackageManager
                     .PERMISSION_GRANTED;
         }
         return true;
     }
 
     /**
-     * 开启应用的设置页面
+     * 获取应用设置页面的 Intent
+     *
+     * @param packageName 包名
+     * @return intent
      */
-    public static void startSettingIntent() {
-        if (sContext != null) {
-            Intent setting = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-            setting.setData(Uri.parse("package:" + sContext.getPackageName()));
-            setting.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            sContext.startActivity(setting);
-        }
+    public static Intent getSettingIntent(String packageName) {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.setData(Uri.parse("package:" + packageName));
+        return intent;
     }
 
-    private static void initContext(Context context) {
+    static void initContext(Context context) {
         if (sContext == null && context != null) {
             sContext = context.getApplicationContext();
             try {
@@ -308,6 +309,14 @@ public class PermissionManager {
         opEntity.waitPermissions = null;
     }
 
+    private static int obtainRequestCode() {
+        /**
+         * @see android.support.v4.app.BaseFragmentActivityApi14#checkForValidRequestCode(int)
+         */
+        if ((sCode & 0xffff0000) != 0) sCode = 0;
+
+        return sCode++;
+    }
 
     /**
      * 用来存储权限相关数据
@@ -326,19 +335,9 @@ public class PermissionManager {
 
         int requestCode;
 
-        static int count = 0;   // 用来生成 requestCode
-
         OpEntity(PermissionCallback callback) {
             this.callback = callback;
-
-            requestCode = count++;
-
-            /**
-             * @see android.support.v4.app.BaseFragmentActivityApi14#checkForValidRequestCode(int)
-             */
-            if ((count & 0xffff0000) != 0) {
-                count = 0;
-            }
+            requestCode = obtainRequestCode();
         }
 
         void addGrantedPermission(String permission) {

@@ -23,11 +23,15 @@ final class RequestHelper {
     private static final String FRAGMENT_TAG = "request_fragment_tag";
 
     public static Activity getActivityByContext(Context context) {
+        PermissionManager.initContext(context);
         while (context instanceof ContextWrapper) {
             if (context instanceof Activity) {
                 return (Activity) context;
             }
             context = ((ContextWrapper) context).getBaseContext();
+        }
+        if (PermissionManager.sDebuggable) {
+            throw new IllegalArgumentException(context + " should be include activity");
         }
         return null;
     }

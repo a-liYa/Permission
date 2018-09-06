@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".PermissionSimpleActivity" />
-        <activity android:name=".NeverAskActivity"></activity>
+        <activity android:name=".NeverAskActivity" />
     </application>
 
 </manifest>

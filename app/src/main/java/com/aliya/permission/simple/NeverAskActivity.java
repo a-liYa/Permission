@@ -1,6 +1,7 @@
 package com.aliya.permission.simple;
 
 import android.Manifest;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.View;
 import com.aliya.permission.Permission;
 import com.aliya.permission.PermissionManager;
 import com.aliya.permission.abs.AbsPermissionCallback;
+import com.aliya.permission.simple.utils.T;
 
 import java.util.List;
 
@@ -55,11 +57,22 @@ public class NeverAskActivity extends AppCompatActivity implements View.OnClickL
                         (NeverAskActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION);
                 if (!before && !after) {
                     // 此处应该Dialog提醒
-                    PermissionManager.startSettingIntent();
+                    startActivityForResult(PermissionManager.getSettingIntent(getPackageName()), 100);
                 }
             }
 
         }, Permission.LOCATION_COARSE);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100) {
+            if (PermissionManager.checkPermission(getApplication(), Permission.LOCATION_COARSE.getPermission())) {
+                T.showShort(this, "手动授权成功");
+            } else {
+                T.showShort(this, "手动授权失败");
+            }
+        }
+    }
 }
