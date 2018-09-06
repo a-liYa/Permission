@@ -210,6 +210,12 @@ public class PermissionManager {
         }
     }
 
+    /**
+     * @param context    should be include activity.
+     * @param permission 权限名称
+     * @return true : 应该向用户解释权限用途
+     * @see Activity#shouldShowRequestPermissionRationale(String)
+     */
     public static boolean shouldShowRequestPermissionRationale(Context context,
                                                                @NonNull String permission) {
         initContext(context);

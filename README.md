@@ -104,7 +104,35 @@ new AbsPermissionCallback() {
 示例：
 
 ```
-PermissionManager.startSettingIntent();
+final boolean before = PermissionManager.shouldShowRequestPermissionRationale(context, Permission.LOCATION_COARSE.getPermission());
+PermissionManager.request(this, new AbsPermissionCallback() {
+
+    @Override
+    public void onGranted(boolean isAlready) {}
+
+    @Override
+    public void onDenied(List<String> neverAskPermissions) {
+        boolean after = PermissionManager.shouldShowRequestPermissionRationale(NeverAskActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION);
+        if (!before && !after) {
+            // 此处应Dialog提醒
+            startActivityForResult(PermissionManager.getSettingIntent(getPackageName()), PERMISSION_REQUEST_CODE);
+        }
+     }
+
+}, Permission.LOCATION_COARSE);
+
+
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (requestCode == PERMISSION_REQUEST_CODE) {
+        if (PermissionManager.checkPermission(getApplication(), Permission.LOCATION_COARSE.getPermission())) {
+            Log.e("TAG", "手动授权成功");
+        } else {
+            Log.e("TAG", "手动授权失败");
+        }
+    }
+}
 ```
 
 
