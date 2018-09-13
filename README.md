@@ -32,6 +32,19 @@ PermissionManager.request(activity, new PermissionCallback() {
 }, Permission.CAMERA);
 ```
 
+> 优势
+
+对比 Google 官方 [easypermisssions](https://github.com/googlesamples/easypermissions) 精简下面方法的实现
+```
+@Override
+public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+    // Forward results to EasyPermissions
+    EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+}
+```
+
 ## 依赖
 ```
 dependencies {
