@@ -151,13 +151,7 @@ public class PermissionManager {
             } else {
                 if (equalsSize(opEntity.waitPermissions, EMPTY)) { // 待申请权限 == 0
                     if (callback != null) {
-                        if (equalsSize(opEntity.grantedPermissions, EMPTY)) {
-                            // 待申请 == 0 && 已授权 == 0
-                            callback.onDenied(opEntity.neverAskPermissions);
-                        } else { // 其他情况：部分拒绝、部分已授权
-                            callback.onElse(opEntity.deniedPermissions, opEntity
-                                    .neverAskPermissions);
-                        }
+                        callback.onDenied(opEntity.deniedPermissions, opEntity.neverAskPermissions);
                     }
                 } else {
                     _get().requestPermission(activity, opEntity);
@@ -202,10 +196,9 @@ public class PermissionManager {
 
             if (equalsSize(opEntity.deniedPermissions, EMPTY)) {
                 opEntity.callback.onGranted(false);
-            } else if (equalsSize(opEntity.grantedPermissions, EMPTY)) {
-                opEntity.callback.onDenied(opEntity.neverAskPermissions);
             } else {
-                opEntity.callback.onElse(opEntity.deniedPermissions, opEntity.neverAskPermissions);
+                opEntity.callback
+                        .onDenied(opEntity.deniedPermissions, opEntity.neverAskPermissions);
             }
         }
     }

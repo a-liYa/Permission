@@ -1,5 +1,8 @@
 package com.aliya.permission.abs;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.aliya.permission.PermissionCallback;
 
 import java.util.List;
@@ -17,11 +20,8 @@ public abstract class AbsPermissionCallback implements PermissionCallback {
     }
 
     @Override
-    public void onDenied(List<String> neverAskPermissions) {
-    }
-
-    @Override
-    public void onElse(List<String> deniedPermissions, List<String> neverAskPermissions) {
+    public void onDenied(@NonNull List<String> deniedPermissions, @Nullable List<String>
+            neverAskPermissions) {
     }
 
 }

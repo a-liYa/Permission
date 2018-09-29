@@ -52,7 +52,7 @@ public class NeverAskActivity extends AppCompatActivity implements View.OnClickL
             }
 
             @Override
-            public void onDenied(List<String> neverAskPermissions) {
+            public void onDenied(List<String> deniedPermissions, List<String> neverAskPermissions) {
                 boolean after = PermissionManager.shouldShowRequestPermissionRationale
                         (NeverAskActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION);
                 if (!before && !after) {

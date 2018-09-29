@@ -13,20 +13,12 @@ PermissionManager.request(activity, new PermissionCallback() {
     }
 
     /**
-     * 全部拒绝 包括不再询问权限
-     * @param neverAskPermissions 被拒绝(不再询问)权限集合
-     */
-    @Override
-    public void onDenied(@Nullable List<String> neverAskPermissions) {
-    }
-
-    /**
-     * 其他情况
+     * 拒绝(至少一个权限拒绝)
+     *
      * @param deniedPermissions   被拒绝权限集合(包括不再询问)
-     * @param neverAskPermissions 被拒绝(不再询问)权限集合
+     * @param neverAskPermissions 被拒绝不再询问权限集合
      */
-    @Override
-    public void onElse(@NonNull List<String> deniedPermissions, @Nullable List<String> neverAskPermissions) {
+    void onDenied(@NonNull List<String> deniedPermissions, @Nullable List<String> neverAskPermissions) {
     }
 
 }, Permission.CAMERA);
@@ -71,36 +63,13 @@ boolean request(Activity activity, PermissionCallback callback, Permission... pe
 所有危险权限均已在枚举类Permission中声明，危险权限建议使用方法(3)(4)申请，普通权限因没有在Permission中声明，所以必须使用方法(1)(2)申请；
 ```
 
-## 申请单个权限
-
-callback 可实现自AbsPermissionCallback，因为不存在 onElse() 情况；
-
-```
-new AbsPermissionCallback() {
-
-    @Override
-    public void onGranted(boolean isAlreadyDef) {
-    }
-
-    @Override
-    public void onDenied(List<String> neverAskPermissions) {
-    }
-}
-```
-
 ## Callback 详解
 
 ### 1. onGranted(boolean isAlreadyDef)
 
     全部授权（包括申请多个权限），isAlreadyDef == true，表示申请之前已经被授权；授权权限集合即为请求权限的集合。
 
-
-### 2. onDenied(@Nullable List<String> neverAskPermissions)
-
-    全部拒绝（包括不再询问），neverAskPermissions **可能为null**，表示勾选不再询问的权限集合；拒绝权限集合（包括不再询问）即为请求权限的集合。
-
-
-### 3. onElse(@NonNull List<String> deniedPermissions, @Nullable List<String> neverAskPermissions)
+### 2. onDenied(@NonNull List<String> deniedPermissions, @Nullable List<String> neverAskPermissions)
 
     部分授权，部分拒绝，单权限申请不存在此情况；deniedPermissions 被拒绝权限的集合（包括不再询问）；授权权限集合 = 请求权限集合 - 拒绝权限集合；
 
@@ -124,7 +93,7 @@ PermissionManager.request(this, new AbsPermissionCallback() {
     public void onGranted(boolean isAlready) {}
 
     @Override
-    public void onDenied(List<String> neverAskPermissions) {
+    public void onDenied(List<String> deniedPermissions, List<String> neverAskPermissions) {
         boolean after = PermissionManager.shouldShowRequestPermissionRationale(NeverAskActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION);
         if (!before && !after) {
             // 此处应Dialog提醒

@@ -12,6 +12,7 @@ import java.util.List;
  * @date 2016/9/18 10:55.
  */
 public interface PermissionCallback {
+
     /**
      * 全部授予
      *
@@ -20,17 +21,12 @@ public interface PermissionCallback {
     void onGranted(boolean isAlready);
 
     /**
-     * 全部拒绝 包括不再询问权限
-     *
-     * @param neverAskPermissions 被拒绝(不再询问)权限集合
-     */
-    void onDenied(@Nullable List<String> neverAskPermissions);
-
-    /**
-     * 其他情况
+     * 拒绝(至少一个权限拒绝)
      *
      * @param deniedPermissions   被拒绝权限集合(包括不再询问)
-     * @param neverAskPermissions 被拒绝(不再询问)权限集合
+     * @param neverAskPermissions 被拒绝不再询问权限集合
      */
-    void onElse(@NonNull List<String> deniedPermissions, @Nullable List<String> neverAskPermissions);
+    void onDenied(@NonNull List<String> deniedPermissions, @Nullable List<String>
+            neverAskPermissions);
+
 }
