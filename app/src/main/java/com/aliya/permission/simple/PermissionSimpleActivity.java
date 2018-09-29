@@ -43,13 +43,8 @@ public class PermissionSimpleActivity extends AppCompatActivity implements View.
             }
 
             @Override
-            public void onDenied(List<String> neverAskPermissions) {
+            public void onDenied(List<String> deniedPermissions, List<String> neverAskPermissions) {
                 T.showShort(getBaseContext(), "拒绝： " + neverAskPermissions);
-            }
-
-            @Override
-            public void onElse(List<String> deniedPermissions, List<String> neverAskPermissions) {
-
             }
 
         }, Permission.CAMERA);
@@ -64,13 +59,8 @@ public class PermissionSimpleActivity extends AppCompatActivity implements View.
             }
 
             @Override
-            public void onDenied(List<String> neverAskPermissions) {
+            public void onDenied(List<String> deniedPermissions, List<String> neverAskPermissions) {
                 T.showShort(getBaseContext(), "拒绝： " + neverAskPermissions);
-            }
-
-            @Override
-            public void onElse(List<String> deniedPermissions, List<String> neverAskPermissions) {
-
             }
 
         }, Permission.STORAGE_READE, Permission.STORAGE_WRITE);

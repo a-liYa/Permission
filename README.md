@@ -60,16 +60,16 @@ boolean request(Activity activity, PermissionCallback callback, Permission... pe
 
 注意：
 ```
-所有危险权限均已在枚举类Permission中声明，危险权限建议使用方法(3)(4)申请，普通权限因没有在Permission中声明，所以必须使用方法(1)(2)申请；
+所有危险权限均已在枚举类Permission中声明，危险权限建议使用方法(3)(4)申请，普通权限因没有在Permission中声明，所以只能使用方法(1)(2)申请；
 ```
 
 ## Callback 详解
 
-### 1. onGranted(boolean isAlreadyDef)
+### 1. onGranted(`boolean isAlreadyDef`)
 
     全部授权（包括申请多个权限），isAlreadyDef == true，表示申请之前已经被授权；授权权限集合即为请求权限的集合。
 
-### 2. onDenied(@NonNull List<String> deniedPermissions, @Nullable List<String> neverAskPermissions)
+### 2. onDenied(`@NonNull List<String> deniedPermissions, @Nullable List<String> neverAskPermissions`)
 
     部分授权，部分拒绝，单权限申请不存在此情况；deniedPermissions 被拒绝权限的集合（包括不再询问）；授权权限集合 = 请求权限集合 - 拒绝权限集合；
 
