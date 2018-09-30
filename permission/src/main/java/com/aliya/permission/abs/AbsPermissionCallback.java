@@ -22,6 +22,10 @@ public abstract class AbsPermissionCallback implements PermissionCallback {
     @Override
     public void onDenied(@NonNull List<String> deniedPermissions, @Nullable List<String>
             neverAskPermissions) {
+        onDenied();
+    }
+
+    public void onDenied() {
     }
 
 }
