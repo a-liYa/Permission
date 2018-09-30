@@ -38,9 +38,11 @@ public void onRequestPermissionsResult(int requestCode, String[] permissions, in
 ```
 
 ## 依赖
+#### 最新版本
+https://bintray.com/a-liya/maven/permission/_latestVersion
 ```
 dependencies {
-    implementation 'com.aliya:permission:0.0.1'
+    implementation 'com.aliya:permission:0.3.1'
 }
 ```
 
