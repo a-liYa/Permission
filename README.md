@@ -95,7 +95,7 @@ PermissionManager.request(this, new AbsPermissionCallback() {
     public void onGranted(boolean isAlready) {}
 
     @Override
-    public void onDenied(List<String> deniedPermissions, List<String> neverAskPermissions) {
+    public void onDenied() {
         boolean after = PermissionManager.shouldShowRequestPermissionRationale(NeverAskActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION);
         if (!before && !after) {
             // 此处应Dialog提醒
