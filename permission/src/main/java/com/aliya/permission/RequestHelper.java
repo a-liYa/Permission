@@ -77,6 +77,7 @@ final class RequestHelper {
         public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                                @NonNull int[] grantResults) {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            PermissionManager.initContext(getActivity()); // 预防页面重启导致 initContext 未执行
             PermissionManager.onRequestPermissionResult(requestCode, permissions, grantResults,
                     this);
         }
