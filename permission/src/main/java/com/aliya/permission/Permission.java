@@ -117,9 +117,7 @@ public enum Permission {
      * @return true / false
      */
     public boolean isPermission(String permission) {
-        if (TextUtils.isEmpty(permission))
-            return false;
+        return !TextUtils.isEmpty(permission) && mPermission.equals(permission);
 
-        return mPermission.equals(permission);
     }
 }

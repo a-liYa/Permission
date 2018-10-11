@@ -42,7 +42,7 @@ public void onRequestPermissionsResult(int requestCode, String[] permissions, in
 https://bintray.com/a-liya/maven/permission/_latestVersion
 ```
 dependencies {
-    implementation 'com.aliya:permission:0.3.1'
+    implementation 'com.aliya:permission:0.3.2'
 }
 ```
 

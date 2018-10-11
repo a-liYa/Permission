@@ -39,7 +39,7 @@ public class PermissionManager {
     private static Context sContext;
 
     /**
-     * @see /build.gradle文件 属性android.buildTypes.(release/debug)#debuggable true/false 来决定
+     * see /build.gradle文件 属性android.buildTypes.(release/debug)#debuggable true/false 来决定
      */
     static boolean sDebuggable = false;
 
@@ -250,12 +250,9 @@ public class PermissionManager {
      * @return true: 已授权
      */
     public static boolean checkPermission(Context context, String permission) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // 对比 PermissionChecker.checkSelfPermission(sContext, permission)
-            return ContextCompat.checkSelfPermission(context, permission) == PackageManager
-                    .PERMISSION_GRANTED;
-        }
-        return true;
+        // 对比 PermissionChecker.checkSelfPermission(sContext, permission)
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
@@ -308,10 +305,13 @@ public class PermissionManager {
         opEntity.waitPermissions = null;
     }
 
+    /**
+     * 生成 request code
+     *
+     * @return request code
+     * @see android.support.v4.app.BaseFragmentActivityApi14#checkForValidRequestCode(int)
+     */
     private static int obtainRequestCode() {
-        /**
-         * @see android.support.v4.app.BaseFragmentActivityApi14#checkForValidRequestCode(int)
-         */
         if ((sCode & 0xffff0000) != 0) sCode = 0;
 
         return sCode++;
@@ -371,7 +371,7 @@ public class PermissionManager {
             return null;
         }
 
-        public static boolean equalsSize(List list, int size) {
+        static boolean equalsSize(List list, int size) {
             return (list != null ? list.size() : 0) == size;
         }
 
