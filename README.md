@@ -99,7 +99,7 @@ PermissionManager.request(this, new AbsPermissionCallback() {
         boolean after = PermissionManager.shouldShowRequestPermissionRationale(NeverAskActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION);
         if (!before && !after) {
             // 此处应Dialog提醒
-            startActivityForResult(PermissionManager.getSettingIntent(getPackageName()), PERMISSION_REQUEST_CODE);
+            startActivityForResult(PermissionManager.getSettingIntent(context), PERMISSION_REQUEST_CODE);
         }
      }
 
