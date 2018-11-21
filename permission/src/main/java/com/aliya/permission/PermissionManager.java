@@ -8,9 +8,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.util.SparseArray;
 
 import java.io.Serializable;
@@ -24,10 +24,10 @@ import static com.aliya.permission.PermissionManager.OpEntity.equalsSize;
 
 /**
  * 动态权限申请工具类
+ * see android.support.v4.app.ActivityCompat#requestPermissions(Activity, String[], int)
  *
  * @author a_liYa
  * @date 2016/7/21 22:22.
- * @see android.support.v4.app.ActivityCompat#requestPermissions(Activity, String[], int)
  */
 public class PermissionManager {
 
@@ -258,8 +258,8 @@ public class PermissionManager {
      */
     public static boolean checkPermission(Context context, String permission) {
         // 对比 PermissionChecker.checkSelfPermission(sContext, permission)
-        return ContextCompat.checkSelfPermission(context, permission) == PackageManager
-                .PERMISSION_GRANTED;
+        return context.checkPermission(permission, android.os.Process.myPid(), Process.myUid()) ==
+                PackageManager.PERMISSION_GRANTED;
     }
 
     /**
@@ -328,9 +328,9 @@ public class PermissionManager {
      * 生成 request code
      *
      * @return request code
-     * @see android.support.v4.app.BaseFragmentActivityApi14#checkForValidRequestCode(int)
      */
     private static int obtainRequestCode() {
+        // see android.support.v4.app.BaseFragmentActivityApi14#checkForValidRequestCode(int)
         if ((sCode & 0xffff0000) != 0) sCode = 0;
 
         return sCode++;
