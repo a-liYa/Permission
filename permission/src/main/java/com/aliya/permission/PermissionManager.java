@@ -54,12 +54,11 @@ public class PermissionManager {
         return mInstance;
     }
 
+    private Set<String> mManifestPermissions;
     private final SparseArray<OpEntity> mRequestCaches;
-    private final Set<String> mManifestPermissions;
 
     private PermissionManager() {
         mRequestCaches = new SparseArray<>();
-        mManifestPermissions = getManifestPermissions();
     }
 
     /**
@@ -130,22 +129,22 @@ public class PermissionManager {
 
         OpEntity opEntity = new OpEntity(callback);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // 权限分类：已授权、待申请
-            {
-                if (permissions != null) {
-                    for (Permission permission : permissions) {
-                        assortPermission(opEntity, permission.getPermission());
-                    }
-                }
-
-                if (permissionStrings != null) {
-                    for (String permission : permissionStrings) {
-                        assortPermission(opEntity, permission);
-                    }
+        // 权限分类：已授权、待申请
+        {
+            if (permissions != null) {
+                for (Permission permission : permissions) {
+                    assortPermission(opEntity, permission.getPermission());
                 }
             }
 
+            if (permissionStrings != null) {
+                for (String permission : permissionStrings) {
+                    assortPermission(opEntity, permission);
+                }
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // 处理 分类权限
             if (equalsSize(opEntity.grantedPermissions, length)) {
                 if (callback != null) callback.onGranted(true);
@@ -160,10 +159,24 @@ public class PermissionManager {
                 }
             }
         } else {
-            if (callback != null) callback.onGranted(true);
-            return true;
+            return dispatchCallback(opEntity);
         }
         return false;
+    }
+
+    private static boolean dispatchCallback(OpEntity opEntity) {
+        final boolean granted = equalsSize(opEntity.deniedPermissions, EMPTY);
+
+        if (opEntity.callback != null) {
+            if (granted) {
+                opEntity.callback.onGranted(Build.VERSION.SDK_INT < Build.VERSION_CODES.M);
+            } else {
+                opEntity.callback
+                        .onDenied(opEntity.deniedPermissions, opEntity.neverAskPermissions);
+            }
+        }
+
+        return granted;
     }
 
     /**
@@ -194,14 +207,7 @@ public class PermissionManager {
                 }
             }
 
-            if (opEntity.callback == null) return;
-
-            if (equalsSize(opEntity.deniedPermissions, EMPTY)) {
-                opEntity.callback.onGranted(false);
-            } else {
-                opEntity.callback
-                        .onDenied(opEntity.deniedPermissions, opEntity.neverAskPermissions);
-            }
+            dispatchCallback(opEntity);
         }
     }
 
@@ -231,16 +237,15 @@ public class PermissionManager {
      * @param permission 权限名称
      */
     static void assortPermission(OpEntity opEntity, String permission) {
-        // 检查申请的权限是否在 AndroidManifest.xml 中
-        if (_get().mManifestPermissions.contains(permission)) {
-            // 判断权限是否被授予
-            if (checkPermission(sContext, permission)) {
-                opEntity.addGrantedPermission(permission);
-            } else {
-                opEntity.addWaitPermission(permission);
-            }
+        // 判断权限是否被授予
+        if (checkPermission(sContext, permission)) {
+            opEntity.addGrantedPermission(permission);
         } else {
-            opEntity.addNeverAskPermission(permission);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                opEntity.addWaitPermission(permission);
+            } else {
+                opEntity.addNeverAskPermission(permission);
+            }
         }
     }
 
@@ -269,6 +274,10 @@ public class PermissionManager {
         return intent;
     }
 
+    public static boolean containsForManifest(Context context, String permission) {
+        return _get().containsManifest(context, permission);
+    }
+
     static void initContext(Context context) {
         if (sContext == null && context != null) {
             sContext = context.getApplicationContext();
@@ -279,6 +288,14 @@ public class PermissionManager {
                 sDebuggable = false;
             }
         }
+    }
+
+    private boolean containsManifest(Context context, String permission) {
+        if (mManifestPermissions == null) {
+            initContext(context);
+            mManifestPermissions = getManifestPermissions();
+        }
+        return mManifestPermissions.contains(permission);
     }
 
     private Set<String> getManifestPermissions() {
