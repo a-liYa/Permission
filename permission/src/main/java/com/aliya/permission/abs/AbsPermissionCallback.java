@@ -25,6 +25,9 @@ public abstract class AbsPermissionCallback implements PermissionCallback {
         onDenied();
     }
 
+    /**
+     * 只要没有全部授权都会回调此方法
+     */
     public void onDenied() {
     }
 
