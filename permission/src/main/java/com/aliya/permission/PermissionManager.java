@@ -65,9 +65,9 @@ public class PermissionManager {
     /**
      * 动态权限申请
      *
-     * @param context     should be include activity.
+     * @param context     Should be include activity.
      * @param callback    回调
-     * @param permissions 权限集
+     * @param permissions 权限集(字符串)
      * @return true：权限申请之前已全部允许
      * @see #request(Activity, PermissionCallback, String...)
      */
@@ -84,7 +84,7 @@ public class PermissionManager {
     /**
      * 动态权限申请
      *
-     * @param context     should be include activity.
+     * @param context     Should be include activity.
      * @param callback    回调
      * @param permissions 权限集
      * @return true：权限申请之前已全部允许
@@ -104,25 +104,27 @@ public class PermissionManager {
      * <p>
      * 注：所申请权限必须在Manifest中静态注册，否则可能崩溃
      *
-     * @param activity    activity
-     * @param callback    回调
-     * @param permissions 权限集
+     * @param activity          Activity
+     * @param callback          回调
+     * @param permissions       权限集
+     * @param permissionStrings 权限集(字符串)
      * @return true：权限申请之前已全部允许
      */
     private static boolean request(Activity activity, PermissionCallback callback,
-                                   Permission[] permissions, String[] permissionArray) {
+                                   Permission[] permissions, String[] permissionStrings) {
 
         initContext(activity);
 
         int length = EMPTY;
         if (permissions != null) length += permissions.length;
-        if (permissionArray != null) length += permissionArray.length;
+        if (permissionStrings != null) length += permissionStrings.length;
 
         // 没有申请的权限
-        if (length == EMPTY || activity == null) {
-            if (activity == null && sDebuggable) {
-                throw new IllegalArgumentException("activity shouldn't be null.");
-            }
+        if (length == EMPTY) return true;
+
+        if (activity == null) {
+            if (sDebuggable) throw new IllegalArgumentException("Activity shouldn't be null.");
+
             return false;
         }
 
@@ -137,8 +139,8 @@ public class PermissionManager {
                     }
                 }
 
-                if (permissionArray != null) {
-                    for (String permission : permissionArray) {
+                if (permissionStrings != null) {
+                    for (String permission : permissionStrings) {
                         assortPermission(opEntity, permission);
                     }
                 }
@@ -204,7 +206,7 @@ public class PermissionManager {
     }
 
     /**
-     * @param context    should be include activity.
+     * @param context    Should be include activity.
      * @param permission 权限名称
      * @return true : 应该向用户解释权限用途
      * @see Activity#shouldShowRequestPermissionRationale(String)
@@ -252,7 +254,8 @@ public class PermissionManager {
     public static boolean checkPermission(Context context, String permission) {
         // 对比 PermissionChecker.checkSelfPermission(sContext, permission)
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
-                ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
+                ContextCompat.checkSelfPermission(context, permission) == PackageManager
+                        .PERMISSION_GRANTED;
     }
 
     /**
