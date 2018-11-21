@@ -247,21 +247,20 @@ public class PermissionManager {
     /**
      * 检查权限是否已经授权
      *
-     * @param context    a any context
+     * @param context    A any context
      * @param permission 被检查权限
      * @return true: 已授权
      */
     public static boolean checkPermission(Context context, String permission) {
         // 对比 PermissionChecker.checkSelfPermission(sContext, permission)
-        return Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
-                ContextCompat.checkSelfPermission(context, permission) == PackageManager
-                        .PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(context, permission) == PackageManager
+                .PERMISSION_GRANTED;
     }
 
     /**
      * 获取应用设置页面的 Intent
      *
-     * @param context a any context
+     * @param context A any context
      * @return intent
      */
     public static Intent getSettingIntent(Context context) {
