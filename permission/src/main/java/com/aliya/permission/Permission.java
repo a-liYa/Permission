@@ -96,8 +96,7 @@ public enum Permission {
     SMS_RECEIVE_WAP_PUSH(Manifest.permission.RECEIVE_WAP_PUSH),
     SMS_RECEIVE_MMS(Manifest.permission.RECEIVE_MMS),
     SMS_RECEIVE(Manifest.permission.RECEIVE_SMS),
-    SMS_SEND(Manifest.permission.SEND_SMS),
-    SMS_READ_CELL_BROADCASTS("permission:android.permission.READ_CELL_BROADCASTS");
+    SMS_SEND(Manifest.permission.SEND_SMS);
 
 
     private String mPermission;
