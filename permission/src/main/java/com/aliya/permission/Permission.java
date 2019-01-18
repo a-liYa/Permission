@@ -1,7 +1,6 @@
 package com.aliya.permission;
 
 import android.Manifest;
-import android.text.TextUtils;
 
 /**
  * dangerous 高危权限列表
@@ -58,15 +57,15 @@ public enum Permission {
 
     // 存储 - 权限组
     STORAGE_WRITE(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-    STORAGE_READE(Manifest.permission.READ_EXTERNAL_STORAGE),
+    STORAGE_READ(Manifest.permission.READ_EXTERNAL_STORAGE),
 
     // 联系人 - 权限组
     CONTACTS_WRITE(Manifest.permission.WRITE_CONTACTS),
     CONTACTS_GET(Manifest.permission.GET_ACCOUNTS),
-    CONTACTS_READE(Manifest.permission.READ_CONTACTS),
+    CONTACTS_READ(Manifest.permission.READ_CONTACTS),
 
     // 电话 - 权限组
-    PHONE_READE_CALL_LOG(Manifest.permission.READ_CALL_LOG),
+    PHONE_READ_CALL_LOG(Manifest.permission.READ_CALL_LOG),
     PHONE_READ_PHONE_STATE(Manifest.permission.READ_PHONE_STATE),
     PHONE_CALL_PHONE(Manifest.permission.CALL_PHONE),
     PHONE_WRITE_CALL_LOG(Manifest.permission.WRITE_CALL_LOG),
@@ -76,7 +75,7 @@ public enum Permission {
 
     // 日历 - 权限组
     CALENDAR_WRITE(Manifest.permission.WRITE_CALENDAR),
-    CALENDAR_READE(Manifest.permission.READ_CALENDAR),
+    CALENDAR_READ(Manifest.permission.READ_CALENDAR),
 
     // 传感器 - 权限组
     SENSORS_BODY(Manifest.permission.BODY_SENSORS),
@@ -116,7 +115,7 @@ public enum Permission {
      * @return true / false
      */
     public boolean isPermission(String permission) {
-        return !TextUtils.isEmpty(permission) && mPermission.equals(permission);
+        return mPermission.equals(permission);
 
     }
 }
