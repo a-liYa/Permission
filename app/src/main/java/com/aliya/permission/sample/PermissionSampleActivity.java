@@ -1,4 +1,4 @@
-package com.aliya.permission.simple;
+package com.aliya.permission.sample;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -7,16 +7,16 @@ import android.view.View;
 import com.aliya.permission.Permission;
 import com.aliya.permission.PermissionCallback;
 import com.aliya.permission.PermissionManager;
-import com.aliya.permission.simple.utils.T;
+import com.aliya.permission.sample.utils.T;
 
 import java.util.List;
 
-public class PermissionSimpleActivity extends AppCompatActivity implements View.OnClickListener {
+public class PermissionSampleActivity extends AppCompatActivity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_permission_simple);
+        setContentView(R.layout.activity_permission_sample);
 
         findViewById(R.id.tv_request_storage).setOnClickListener(this);
         findViewById(R.id.tv_request_camera).setOnClickListener(this);

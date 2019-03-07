@@ -1,4 +1,4 @@
-package com.aliya.permission.simple;
+package com.aliya.permission.sample;
 
 import android.app.Application;
 

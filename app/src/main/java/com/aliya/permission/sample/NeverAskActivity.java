@@ -1,4 +1,4 @@
-package com.aliya.permission.simple;
+package com.aliya.permission.sample;
 
 import android.Manifest;
 import android.content.Intent;
@@ -9,7 +9,7 @@ import android.view.View;
 import com.aliya.permission.Permission;
 import com.aliya.permission.PermissionManager;
 import com.aliya.permission.abs.AbsPermissionCallback;
-import com.aliya.permission.simple.utils.T;
+import com.aliya.permission.sample.utils.T;
 
 import java.util.List;
 

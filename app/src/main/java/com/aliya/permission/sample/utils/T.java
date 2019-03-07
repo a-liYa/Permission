@@ -1,4 +1,4 @@
-package com.aliya.permission.simple.utils;
+package com.aliya.permission.sample.utils;
 
 import android.content.Context;
 import android.widget.Toast;
