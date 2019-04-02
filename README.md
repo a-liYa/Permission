@@ -37,9 +37,12 @@ public void onRequestPermissionsResult(int requestCode, String[] permissions, in
 }
 ```
 
+
 ## 依赖
-#### 最新版本
-https://bintray.com/a-liya/maven/permission/_latestVersion
+[![Licenses](https://img.shields.io/badge/Licenses-Apache%202.0-337ab7.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+[![Download](https://api.bintray.com/packages/a-liya/maven/permission/images/download.svg)](https://bintray.com/a-liya/maven/permission/_latestVersion)
+[![MinSdk](https://img.shields.io/badge/%20MinSdk%20-%2014%2B%20-f0ad4e.svg)](https://android-arsenal.com/api?level=12)
+
 ```
 dependencies {
     implementation 'com.aliya:permission:0.4.1'
