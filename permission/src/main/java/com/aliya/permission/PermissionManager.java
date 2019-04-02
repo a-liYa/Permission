@@ -98,6 +98,24 @@ public class PermissionManager {
         return request(activity, callback, permissions, null);
     }
 
+    public static boolean request(
+            Context context, PermissionCallback callback, Permission.Group... groups) {
+        Permission[] permissions = null;
+        for (Permission.Group group : groups) {
+            Permission[] groupPermissions = group.getGroup();
+            if (permissions == null) {
+                permissions = groupPermissions;
+            } else {
+                permissions = Arrays.copyOf(permissions,
+                        permissions.length + groupPermissions.length);
+                System.arraycopy(groupPermissions, 0, permissions,
+                        permissions.length - groupPermissions.length,
+                        groupPermissions.length);
+            }
+        }
+        return request(context, callback, permissions);
+    }
+
     /**
      * 动态申请权限
      * <p>

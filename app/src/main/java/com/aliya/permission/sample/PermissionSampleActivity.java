@@ -63,7 +63,7 @@ public class PermissionSampleActivity extends AppCompatActivity implements View.
                 T.showShort(getBaseContext(), "拒绝： " + neverAskPermissions);
             }
 
-        }, Permission.STORAGE_READ, Permission.STORAGE_WRITE);
+        }, Permission.Group.STORAGE);
     }
 
 }
