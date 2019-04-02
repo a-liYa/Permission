@@ -1,10 +1,10 @@
-apply plugin: 'bintray-release'
+apply plugin: 'com.novoda.bintray-release'
 
 publish {
     userOrg = "a-liya" // bintray.com 用户名
     groupId = "com.aliya" // jcenter上的路径
-    artifactId = publishArtifact
-    publishVersion = publishVersion // 版本号
-    desc = publishDesc
-    website = publishWebsite
+    artifactId = 'permission'
+    publishVersion = version_name // 版本号
+    desc = 'Android 权限申请工具类'
+    website = 'https://github.com/a-liYa/Permission'
 }
