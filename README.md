@@ -1,6 +1,17 @@
 # Permission
 Android 权限申请工具类，一行代码即可申请权限
 
+## 依赖
+[![License](https://img.shields.io/badge/License-Apache%202.0-337ab7.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+[![Download](https://api.bintray.com/packages/a-liya/maven/permission/images/download.svg)](https://bintray.com/a-liya/maven/permission/_latestVersion)
+[![MinSdk](https://img.shields.io/badge/%20MinSdk%20-%2014%20-f0ad4e.svg)](https://android-arsenal.com/api?level=12)
+
+```
+dependencies {
+    implementation 'com.aliya:permission:0.5.1'
+}
+```
+
 ```
 PermissionManager.request(activity, new PermissionCallback() {
 
@@ -43,17 +54,6 @@ public void onRequestPermissionsResult(int requestCode, String[] permissions, in
 2. 对于针对 Android 8.0 的应用，此行为已被纠正。系统只会授予应用明确请求的权限。然而，一旦用户为应用授予某个权限，则所有后续对该权限组中权限的请求都将被自动批准。
 
 建议：**同组权限一起申请**。当我们申请权限时。申请同组的多个权限时，也只会弹出一次申请框。所以不如一起申请。
-
-## 依赖
-[![License](https://img.shields.io/badge/License-Apache%202.0-337ab7.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-[![Download](https://api.bintray.com/packages/a-liya/maven/permission/images/download.svg)](https://bintray.com/a-liya/maven/permission/_latestVersion)
-[![MinSdk](https://img.shields.io/badge/%20MinSdk%20-%2014%20-f0ad4e.svg)](https://android-arsenal.com/api?level=12)
-
-```
-dependencies {
-    implementation 'com.aliya:permission:0.4.1'
-}
-```
 
 ## 请求权限 - 重载方法
 
