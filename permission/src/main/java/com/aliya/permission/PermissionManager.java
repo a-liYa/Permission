@@ -268,16 +268,29 @@ public class PermissionManager {
     }
 
     /**
-     * 检查权限是否已经授权
+     * 检查权限是否已经全部授权
      *
      * @param context    A any context
-     * @param permission 被检查权限
-     * @return true: 已授权
+     * @param permissions 权限集合
+     * @return true: 已全部授权
      */
-    public static boolean checkPermission(Context context, String permission) {
-        // 对比 PermissionChecker.checkSelfPermission(sContext, permission)
-        return context.checkPermission(permission, android.os.Process.myPid(), Process.myUid()) ==
-                PackageManager.PERMISSION_GRANTED;
+    public static boolean checkPermission(Context context, String... permissions) {
+        for (String permission : permissions) {
+            // 对比 PermissionChecker.checkSelfPermission(sContext, permission)
+            if (context.checkPermission(permission, android.os.Process.myPid(), Process.myUid()) !=
+                    PackageManager.PERMISSION_GRANTED)
+                return false;
+        }
+        return true;
+    }
+
+    public static boolean checkPermission(Context context, Permission... permissions) {
+        for (Permission permission : permissions) {
+            if (context.checkPermission(permission.getPermission(), android.os.Process.myPid(),
+                    Process.myUid()) != PackageManager.PERMISSION_GRANTED)
+                return false;
+        }
+        return true;
     }
 
     /**
