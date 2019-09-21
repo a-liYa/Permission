@@ -83,14 +83,14 @@ public class PermissionManager {
     /**
      * 动态权限申请
      *
-     * @param context     Should be include activity.
-     * @param callback    回调
-     * @param permissions 权限集
+     * @param activityContext Should be include activity.
+     * @param callback        回调
+     * @param permissions     权限集
      * @return true：权限申请之前已全部允许
      */
     public static boolean request(
-            Context context, PermissionCallback callback, Permission... permissions) {
-        return request(RequestHelper.getActivityByContext(context), callback, permissions);
+            Context activityContext, PermissionCallback callback, Permission... permissions) {
+        return request(RequestHelper.getActivityByContext(activityContext), callback, permissions);
     }
 
     public static boolean request(
@@ -99,7 +99,7 @@ public class PermissionManager {
     }
 
     public static boolean request(
-            Context context, PermissionCallback callback, Permission.Group... groups) {
+            Context activityContext, PermissionCallback callback, Permission.Group... groups) {
         Permission[] permissions = null;
         for (Permission.Group group : groups) {
             Permission[] groupPermissions = group.getGroup();
@@ -113,7 +113,7 @@ public class PermissionManager {
                         groupPermissions.length);
             }
         }
-        return request(context, callback, permissions);
+        return request(activityContext, callback, permissions);
     }
 
     /**
@@ -230,16 +230,16 @@ public class PermissionManager {
     }
 
     /**
-     * @param context    Should be include activity.
-     * @param permission 权限名称
+     * @param activityContext Should be include activity.
+     * @param permission      权限名称
      * @return true : 应该向用户解释权限用途
      * @see Activity#shouldShowRequestPermissionRationale(String)
      */
-    public static boolean shouldShowRequestPermissionRationale(Context context,
+    public static boolean shouldShowRequestPermissionRationale(Context activityContext,
                                                                @NonNull String permission) {
-        initContext(context);
+        initContext(activityContext);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Activity activity = RequestHelper.getActivityByContext(context);
+            Activity activity = RequestHelper.getActivityByContext(activityContext);
             if (activity != null) {
                 return activity.shouldShowRequestPermissionRationale(permission);
             }
@@ -270,7 +270,7 @@ public class PermissionManager {
     /**
      * 检查权限是否已经全部授权
      *
-     * @param context    A any context
+     * @param context     A any context
      * @param permissions 权限集合
      * @return true: 已全部授权
      */

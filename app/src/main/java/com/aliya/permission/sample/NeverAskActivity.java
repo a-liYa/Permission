@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 
 import com.aliya.permission.Permission;
@@ -28,6 +29,7 @@ public class NeverAskActivity extends AppCompatActivity implements View.OnClickL
 
         findViewById(R.id.tv_location).setOnClickListener(this);
 
+        Log.e("TAG", "onCreate: " + getClass().getSimpleName());
     }
 
     @Override
@@ -67,6 +69,7 @@ public class NeverAskActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.e("TAG", "onActivityResult: " + getClass().getSimpleName() + " - " + requestCode);
         if (requestCode == 100) {
             if (PermissionManager.checkPermission(getApplication(), Permission.LOCATION_COARSE.getPermission())) {
                 T.showShort(this, "手动授权成功");
