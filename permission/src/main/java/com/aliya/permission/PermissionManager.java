@@ -75,6 +75,9 @@ public class PermissionManager {
         return request(RequestHelper.getActivityByContext(context), callback, permissions);
     }
 
+    /**
+     * @see #request(Activity, PermissionCallback, Permission[], String[])
+     */
     public static boolean request(
             Activity activity, PermissionCallback callback, String... permissions) {
         return request(activity, callback, null, permissions);
@@ -87,12 +90,16 @@ public class PermissionManager {
      * @param callback        回调
      * @param permissions     权限集
      * @return true：权限申请之前已全部允许
+     * @see #request(Activity, PermissionCallback, String...)
      */
     public static boolean request(
             Context activityContext, PermissionCallback callback, Permission... permissions) {
         return request(RequestHelper.getActivityByContext(activityContext), callback, permissions);
     }
 
+    /**
+     * @see #request(Activity, PermissionCallback, Permission[], String[])
+     */
     public static boolean request(
             Activity activity, PermissionCallback callback, Permission... permissions) {
         return request(activity, callback, permissions, null);
@@ -106,8 +113,10 @@ public class PermissionManager {
             if (permissions == null) {
                 permissions = groupPermissions;
             } else {
+                // 数组扩容并原封拷贝
                 permissions = Arrays.copyOf(permissions,
                         permissions.length + groupPermissions.length);
+                // 拷贝 groupPermissions 至 permissions 扩容部分
                 System.arraycopy(groupPermissions, 0, permissions,
                         permissions.length - groupPermissions.length,
                         groupPermissions.length);
