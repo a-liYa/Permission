@@ -22,7 +22,7 @@ final class RequestHelper {
 
     private static final String FRAGMENT_TAG = "request_fragment_tag";
 
-    public static Activity getActivityByContext(Context context) {
+    public static Activity findActivity(Context context) {
         PermissionManager.initContext(context);
         while (context instanceof ContextWrapper) {
             if (context instanceof Activity) {

@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.aliya.permission.RequestHelper.findActivity;
+
 /**
  * 动态权限申请工具类
  * see android.support.v4.app.ActivityCompat#requestPermissions(Activity, String[], int)
@@ -67,15 +69,15 @@ public class PermissionManager {
      */
     public static boolean request(
             Context context, PermissionCallback callback, String... permissions) {
-        return request(RequestHelper.getActivityByContext(context), callback, permissions);
+        return request(findActivity(context), callback, permissions);
     }
 
     /**
-     * @see #request(Activity, PermissionCallback, Permission[], String[])
+     * @see #request(Activity, PermissionCallback, Permission[], String[], boolean)
      */
     public static boolean request(
             Activity activity, PermissionCallback callback, String... permissions) {
-        return request(activity, callback, null, permissions);
+        return request(activity, callback, null, permissions, false);
     }
 
     /**
@@ -89,15 +91,15 @@ public class PermissionManager {
      */
     public static boolean request(
             Context activityContext, PermissionCallback callback, Permission... permissions) {
-        return request(RequestHelper.getActivityByContext(activityContext), callback, permissions);
+        return request(findActivity(activityContext), callback, permissions);
     }
 
     /**
-     * @see #request(Activity, PermissionCallback, Permission[], String[])
+     * @see #request(Activity, PermissionCallback, Permission[], String[], boolean)
      */
     public static boolean request(
             Activity activity, PermissionCallback callback, Permission... permissions) {
-        return request(activity, callback, permissions, null);
+        return request(activity, callback, permissions, null, false);
     }
 
     public static boolean request(
@@ -132,7 +134,8 @@ public class PermissionManager {
      * @return true：权限申请之前已全部允许
      */
     private static boolean request(Activity activity, PermissionCallback callback,
-                                   Permission[] permissions, String[] permissionStrings) {
+                                   Permission[] permissions, String[] permissionStrings,
+                                   boolean isOpenSetting) {
 
         initContext(activity);
 
@@ -149,7 +152,7 @@ public class PermissionManager {
             return false;
         }
 
-        OpEntity opEntity = new OpEntity(callback);
+        OpEntity opEntity = new OpEntity(callback, isOpenSetting);
 
         // 权限分类：已授权、待申请
         {
@@ -184,6 +187,11 @@ public class PermissionManager {
             return dispatchCallback(opEntity);
         }
         return false;
+    }
+
+    public static boolean requestOpenSetting(
+            Context activityContext, PermissionCallback callback, Permission[] permissions) {
+        return request(findActivity(activityContext), callback, permissions, null, true);
     }
 
     private static boolean dispatchCallback(OpEntity opEntity) {
@@ -243,7 +251,7 @@ public class PermissionManager {
                                                                @NonNull String permission) {
         initContext(activityContext);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Activity activity = RequestHelper.getActivityByContext(activityContext);
+            Activity activity = findActivity(activityContext);
             if (activity != null) {
                 return activity.shouldShowRequestPermissionRationale(permission);
             }
@@ -310,7 +318,7 @@ public class PermissionManager {
     }
 
     public static boolean containsForManifest(Context context, String permission) {
-        return _get().containsManifest(context, permission);
+        return _get().manifestContains(context, permission);
     }
 
     static void initContext(Context context) {
@@ -325,7 +333,7 @@ public class PermissionManager {
         }
     }
 
-    private boolean containsManifest(Context context, String permission) {
+    private boolean manifestContains(Context context, String permission) {
         if (mManifestPermissions == null) {
             initContext(context);
             mManifestPermissions = getManifestPermissions();
