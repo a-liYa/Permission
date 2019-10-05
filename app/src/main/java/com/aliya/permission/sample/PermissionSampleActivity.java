@@ -65,5 +65,4 @@ public class PermissionSampleActivity extends AppCompatActivity implements View.
 
         }, Permission.Group.STORAGE);
     }
-
 }

@@ -20,13 +20,11 @@ class OpEntity implements Serializable {
     List<String> waitPermissions;      // 待申请权限集合
 
     PermissionCallback callback;
-    boolean isOpenSetting;
 
     int requestCode;
 
-    OpEntity(PermissionCallback callback, boolean isOpenSetting) {
+    OpEntity(PermissionCallback callback) {
         this.callback = callback;
-        this.isOpenSetting = isOpenSetting;
         requestCode = obtainRequestCode();
     }
 

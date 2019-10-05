@@ -15,9 +15,9 @@ import android.util.SparseArray;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
+import static com.aliya.permission.RequestHelper.equalsSize;
 import static com.aliya.permission.RequestHelper.findActivity;
 
 /**
@@ -73,11 +73,11 @@ public class PermissionManager {
     }
 
     /**
-     * @see #request(Activity, PermissionCallback, Permission[], String[], boolean)
+     * @see #request(Activity, PermissionCallback, Permission[], String[])
      */
     public static boolean request(
             Activity activity, PermissionCallback callback, String... permissions) {
-        return request(activity, callback, null, permissions, false);
+        return request(activity, callback, null, permissions);
     }
 
     /**
@@ -95,11 +95,11 @@ public class PermissionManager {
     }
 
     /**
-     * @see #request(Activity, PermissionCallback, Permission[], String[], boolean)
+     * @see #request(Activity, PermissionCallback, Permission[], String[])
      */
     public static boolean request(
             Activity activity, PermissionCallback callback, Permission... permissions) {
-        return request(activity, callback, permissions, null, false);
+        return request(activity, callback, permissions, null);
     }
 
     public static boolean request(
@@ -134,9 +134,7 @@ public class PermissionManager {
      * @return true：权限申请之前已全部允许
      */
     private static boolean request(Activity activity, PermissionCallback callback,
-                                   Permission[] permissions, String[] permissionStrings,
-                                   boolean isOpenSetting) {
-
+                                   Permission[] permissions, String[] permissionStrings) {
         initContext(activity);
 
         int length = EMPTY;
@@ -148,11 +146,10 @@ public class PermissionManager {
 
         if (activity == null) {
             if (sDebuggable) throw new IllegalArgumentException("Activity shouldn't be null.");
-
             return false;
         }
 
-        OpEntity opEntity = new OpEntity(callback, isOpenSetting);
+        OpEntity opEntity = new OpEntity(callback);
 
         // 权限分类：已授权、待申请
         {
@@ -187,11 +184,6 @@ public class PermissionManager {
             return dispatchCallback(opEntity);
         }
         return false;
-    }
-
-    public static boolean requestOpenSetting(
-            Context activityContext, PermissionCallback callback, Permission[] permissions) {
-        return request(findActivity(activityContext), callback, permissions, null, true);
     }
 
     private static boolean dispatchCallback(OpEntity opEntity) {
@@ -236,12 +228,14 @@ public class PermissionManager {
                     }
                 }
             }
-
             dispatchCallback(opEntity);
         }
     }
 
     /**
+     * 是否应显示解释请求权限原因的UI，大致逻辑，申请权限没被拒绝时，返回false，拒绝但未勾选不再提醒，返回true，
+     * 拒绝且勾选不再提醒，返回false。
+     *
      * @param activityContext Should be include activity.
      * @param permission      权限名称
      * @return true : 应该向用户解释权限用途
@@ -362,12 +356,8 @@ public class PermissionManager {
 
     private void requestPermission(Activity activity, OpEntity opEntity) {
         mRequestCaches.put(opEntity.requestCode, opEntity);
-        PermissionOperate operate = RequestHelper.getPermissionOperate(activity);
-        operate.exeRequestPermissions(opEntity.getWaitPermsArray(), opEntity.requestCode);
+        RequestHelper.requestPermission(activity, opEntity.getWaitPermsArray(),
+                opEntity.requestCode);
         opEntity.waitPermissions = null;
-    }
-
-    static boolean equalsSize(List list, int size) {
-        return (list != null ? list.size() : 0) == size;
     }
 }

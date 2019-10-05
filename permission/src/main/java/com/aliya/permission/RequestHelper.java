@@ -12,6 +12,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.SparseArray;
 
+import java.util.List;
+
 /**
  * 帮助 {@link RequestPermissionFragment}  获取或添加到Activity
  *
@@ -22,7 +24,7 @@ final class RequestHelper {
 
     private static final String FRAGMENT_TAG = "request_fragment_tag";
 
-    public static Activity findActivity(Context context) {
+    static Activity findActivity(Context context) {
         PermissionManager.initContext(context);
         while (context instanceof ContextWrapper) {
             if (context instanceof Activity) {
@@ -31,12 +33,20 @@ final class RequestHelper {
             context = ((ContextWrapper) context).getBaseContext();
         }
         if (PermissionManager.sDebuggable) {
-            throw new IllegalArgumentException(context + " should be include activity");
+            throw new IllegalArgumentException(context + " should be extends activity");
         }
         return null;
     }
 
-    public static PermissionOperate getPermissionOperate(Activity activity) {
+    static boolean equalsSize(List list, int size) {
+        return (list != null ? list.size() : 0) == size;
+    }
+
+    static void requestPermission(Activity activity, String[] permissions, int requestCode) {
+        getPermissionOperate(activity).exeRequestPermissions(permissions, requestCode);
+    }
+
+    private static PermissionOperate getPermissionOperate(Activity activity) {
         FragmentManager manager = activity.getFragmentManager();
         Fragment fragmentByTag = manager.findFragmentByTag(FRAGMENT_TAG);
         RequestPermissionFragment requestFragment;
@@ -59,14 +69,24 @@ final class RequestHelper {
 
         private SparseArray<String[]> mWaitingArray;
 
+        public RequestPermissionFragment() {
+            setRetainInstance(true);
+        }
+
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             if (mWaitingArray != null) {
                 for (int i = 0; i < mWaitingArray.size(); i++) {
-                    int key = mWaitingArray.keyAt(i);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        requestPermissions(mWaitingArray.get(key), key);
+                    int requestCode = mWaitingArray.keyAt(i);
+                    String[] permissions = mWaitingArray.get(requestCode);
+                    if (permissions != null) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            requestPermissions(permissions, requestCode);
+                        }
+                    } else {
+                        startActivityForResult
+                                (PermissionManager.getSettingIntent(getActivity()), requestCode);
                     }
                 }
                 mWaitingArray = null;
@@ -100,7 +120,6 @@ final class RequestHelper {
         public boolean exeShouldShowRequestPermissionRationale(@NonNull String permission) {
             return shouldShowRequestPermissionRationale(permission);
         }
-
     }
 
 }

@@ -59,7 +59,8 @@ public class NeverAskActivity extends AppCompatActivity implements View.OnClickL
                         (NeverAskActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION);
                 if (!before && !after) {
                     // 此处应该Dialog提醒
-                    startActivityForResult(PermissionManager.getSettingIntent(getApplication()), 100);
+                    startActivityForResult(PermissionManager.getSettingIntent(getApplication()),
+                            100);
                 }
             }
 
@@ -69,9 +70,9 @@ public class NeverAskActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.e("TAG", "onActivityResult: " + getClass().getSimpleName() + " - " + requestCode);
         if (requestCode == 100) {
-            if (PermissionManager.checkPermission(getApplication(), Permission.LOCATION_COARSE.getPermission())) {
+            if (PermissionManager.checkPermission(getApplication(),
+                    Permission.LOCATION_COARSE.getPermission())) {
                 T.showShort(this, "手动授权成功");
             } else {
                 T.showShort(this, "手动授权失败");
