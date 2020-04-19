@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.util.SparseArray;
 
 import java.util.Arrays;
@@ -51,9 +52,17 @@ public class PermissionManager {
 
     private Set<String> mManifestPermissions;
     private final SparseArray<OpEntity> mRequestCaches;
+    private final ResultHelper.OnPermissionsResultCallback mPermissionsResultCallback;
 
     private PermissionManager() {
         mRequestCaches = new SparseArray<>();
+        mPermissionsResultCallback = new ResultHelper.OnPermissionsResultCallback() {
+            @Override
+            public void onPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                            @NonNull int[] grantResults) {
+                onRequestPermissionResult(requestCode, permissions, grantResults);
+            }
+        };
     }
 
     /**
@@ -67,7 +76,7 @@ public class PermissionManager {
      */
     public static boolean request(
             Context context, PermissionCallback callback, String... permissions) {
-        return request(RequestHelper.getActivityByContext(context), callback, permissions);
+        return request(ResultHelper.getActivityByContext(context), callback, permissions);
     }
 
     /**
@@ -89,7 +98,7 @@ public class PermissionManager {
      */
     public static boolean request(
             Context activityContext, PermissionCallback callback, Permission... permissions) {
-        return request(RequestHelper.getActivityByContext(activityContext), callback, permissions);
+        return request(ResultHelper.getActivityByContext(activityContext), callback, permissions);
     }
 
     /**
@@ -131,7 +140,7 @@ public class PermissionManager {
      * @param permissionStrings 权限集(字符串)
      * @return true：权限申请之前已全部允许
      */
-    private static boolean request(Activity activity, PermissionCallback callback,
+    static boolean request(Activity activity, PermissionCallback callback,
                                    Permission[] permissions, String[] permissionStrings) {
 
         initContext(activity);
@@ -149,7 +158,7 @@ public class PermissionManager {
             return false;
         }
 
-        OpEntity opEntity = new OpEntity(callback);
+        OpEntity opEntity = new OpEntity(activity, callback);
 
         // 权限分类：已授权、待申请
         {
@@ -186,7 +195,7 @@ public class PermissionManager {
         return false;
     }
 
-    private static boolean dispatchCallback(OpEntity opEntity) {
+    static boolean dispatchCallback(OpEntity opEntity) {
         final boolean granted = equalsSize(opEntity.deniedPermissions, EMPTY);
 
         if (opEntity.callback != null) {
@@ -208,9 +217,8 @@ public class PermissionManager {
      * @param permissions  申请权限集合 {@link Permission}
      * @param grantResults 申请结果集合
      */
-    static void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults,
-                                          PermissionOperate showRationale) {
-
+    static void onRequestPermissionResult(int requestCode, String[] permissions,
+                                          int[] grantResults) {
         OpEntity opEntity = _get().mRequestCaches.get(requestCode);
         if (opEntity != null) {
             _get().mRequestCaches.remove(requestCode);
@@ -219,7 +227,7 @@ public class PermissionManager {
                 if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {  // 权限被授予
                     opEntity.addGrantedPermission(permissions[i]);
                 } else { // 权限被拒绝
-                    if (!showRationale.exeShouldShowRequestPermissionRationale((permissions[i]))) {
+                    if (!shouldShowRequestPermissionRationale(opEntity.getActivity(), permissions[i])) {
                         // 1、拒绝且不再询问
                         opEntity.addNeverAskPermission(permissions[i]);
                     } else {
@@ -241,9 +249,8 @@ public class PermissionManager {
      */
     public static boolean shouldShowRequestPermissionRationale(Context activityContext,
                                                                @NonNull String permission) {
-        initContext(activityContext);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Activity activity = RequestHelper.getActivityByContext(activityContext);
+            Activity activity = ResultHelper.getActivityByContext(activityContext);
             if (activity != null) {
                 return activity.shouldShowRequestPermissionRationale(permission);
             }
@@ -288,15 +295,6 @@ public class PermissionManager {
         return true;
     }
 
-    public static boolean checkPermission(Context context, Permission... permissions) {
-        for (Permission permission : permissions) {
-            if (context.checkPermission(permission.getPermission(), android.os.Process.myPid(),
-                    Process.myUid()) != PackageManager.PERMISSION_GRANTED)
-                return false;
-        }
-        return true;
-    }
-
     /**
      * 获取应用设置页面的 Intent
      *
@@ -307,10 +305,6 @@ public class PermissionManager {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.setData(Uri.parse("package:" + context.getPackageName()));
         return intent;
-    }
-
-    public static boolean containsForManifest(Context context, String permission) {
-        return _get().containsManifest(context, permission);
     }
 
     static void initContext(Context context) {
@@ -325,14 +319,20 @@ public class PermissionManager {
         }
     }
 
-    private boolean containsManifest(Context context, String permission) {
-        if (mManifestPermissions == null) {
-            initContext(context);
-            mManifestPermissions = getManifestPermissions();
-        }
-        return mManifestPermissions.contains(permission);
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void requestPermission(Activity activity, OpEntity opEntity) {
+        mRequestCaches.put(opEntity.requestCode, opEntity);
+        ResultHelper.requestPermissions(activity, opEntity.getWaitPermsArray(),
+                opEntity.requestCode, mPermissionsResultCallback);
+        opEntity.waitPermissions = null;
     }
 
+    static boolean equalsSize(List list, int size) {
+        return (list != null ? list.size() : 0) == size;
+    }
+
+
+    @Deprecated
     private Set<String> getManifestPermissions() {
         Set<String> manifestPermissions = null;
         PackageInfo packageInfo = null;
@@ -350,16 +350,5 @@ public class PermissionManager {
         }
 
         return manifestPermissions != null ? manifestPermissions : new HashSet<String>(0);
-    }
-
-    private void requestPermission(Activity activity, OpEntity opEntity) {
-        mRequestCaches.put(opEntity.requestCode, opEntity);
-        PermissionOperate operate = RequestHelper.getPermissionOperate(activity);
-        operate.exeRequestPermissions(opEntity.getWaitPermsArray(), opEntity.requestCode);
-        opEntity.waitPermissions = null;
-    }
-
-    static boolean equalsSize(List list, int size) {
-        return (list != null ? list.size() : 0) == size;
     }
 }

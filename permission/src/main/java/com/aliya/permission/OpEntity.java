@@ -1,6 +1,11 @@
 package com.aliya.permission;
 
+import android.app.Activity;
+import android.content.Context;
+
 import java.io.Serializable;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,12 +25,18 @@ class OpEntity implements Serializable {
     List<String> waitPermissions;      // 待申请权限集合
 
     PermissionCallback callback;
+    private WeakReference<Activity> mActivityWeak;
 
     int requestCode;
 
-    OpEntity(PermissionCallback callback) {
+    OpEntity(Activity activity, PermissionCallback callback) {
+        this.mActivityWeak = new WeakReference<>(activity);
         this.callback = callback;
         requestCode = obtainRequestCode();
+    }
+
+    Activity getActivity() {
+        return mActivityWeak.get();
     }
 
     void addGrantedPermission(String permission) {
@@ -71,4 +82,5 @@ class OpEntity implements Serializable {
 
         return sCode++;
     }
+
 }
