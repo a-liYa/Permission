@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 ext {
-    version_code = 50
-    version_name = '0.5.1'
+    version_code = 60
+    version_name = '0.6.0'
 }
 
 android {
