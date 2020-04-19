@@ -28,8 +28,6 @@ public class NeverAskActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_never_ask);
 
         findViewById(R.id.tv_location).setOnClickListener(this);
-
-        Log.e("TAG", "onCreate: " + getClass().getSimpleName());
     }
 
     @Override
@@ -50,7 +48,7 @@ public class NeverAskActivity extends AppCompatActivity implements View.OnClickL
 
             @Override
             public void onGranted(boolean isAlready) {
-
+                T.showShort(NeverAskActivity.this, "权限允许");
             }
 
             @Override

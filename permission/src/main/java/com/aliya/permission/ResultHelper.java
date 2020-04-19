@@ -5,12 +5,16 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.SparseArray;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 通过设置 Callback 实现 Activity#onRequestPermissionsResult(int, String[], String[]) 回调
@@ -36,7 +40,7 @@ public final class ResultHelper {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public static boolean requestPermissions(Context context,
+    static boolean requestPermissions(Context context,
                                              String[] permissions, int requestCode,
                                              OnPermissionsResultCallback callback) {
         final Activity activity = getActivityByContext(context);
@@ -55,6 +59,32 @@ public final class ResultHelper {
         return true;
     }
 
+    public static boolean startActivityForResult(Context context,
+                                                 Intent intent, int requestCode,
+                                                 OnActivityResultCallback callback) {
+        return startActivityForResult(context, intent, requestCode, null, callback);
+    }
+
+    public static boolean startActivityForResult(Context context,
+                                                 Intent intent, int requestCode, Bundle options,
+                                                 OnActivityResultCallback callback) {
+        if (context instanceof Activity) {
+            Activity activity = ((Activity) context);
+            FragmentManager manager = activity.getFragmentManager();
+            InnerResultFragment resultFragment;
+            Fragment fragmentByTag = manager.findFragmentByTag(FRAGMENT_TAG);
+            if (fragmentByTag instanceof InnerResultFragment) {
+                resultFragment = (InnerResultFragment) fragmentByTag;
+            } else {
+                resultFragment = new InnerResultFragment();
+                manager.beginTransaction().add(resultFragment, FRAGMENT_TAG).commitAllowingStateLoss();
+            }
+            resultFragment.startActivityForResult(intent, requestCode, options, callback);
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 通过 Fragment 协助实现
      *
@@ -65,6 +95,9 @@ public final class ResultHelper {
 
         private SparseArray<String[]> mWaitingRequestPermissions;
         private SparseArray<OnPermissionsResultCallback> mPermissionsResultCallbacks;
+
+        private List<IntentConfig> mWaitingStartActivities;
+        private List<CallbackParams> mCallbackParams = new ArrayList<>(1);
 
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,6 +110,13 @@ public final class ResultHelper {
                     }
                 }
                 mWaitingRequestPermissions = null;
+            }
+
+            if (mWaitingStartActivities != null) {
+                for (IntentConfig config : mWaitingStartActivities) {
+                    startActivityForResult(config.intent, config.requestCode, config.options);
+                }
+                mWaitingStartActivities = null; // onCreate 之后不再使用，置空。
             }
         }
 
@@ -108,10 +148,66 @@ public final class ResultHelper {
                 mWaitingRequestPermissions.put(requestCode, permissions);
             }
         }
+
+        public void startActivityForResult(Intent intent, int requestCode, Bundle options,
+                                           OnActivityResultCallback callback) {
+            if (callback != null)
+                mCallbackParams.add(new CallbackParams(requestCode, callback));
+            if (isAdded()) {
+                startActivityForResult(intent, requestCode, options);
+            } else {
+                if (mWaitingStartActivities == null) {
+                    mWaitingStartActivities = new ArrayList<>(1);
+                }
+                mWaitingStartActivities.add(new IntentConfig(intent, requestCode, options));
+            }
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            super.onActivityResult(requestCode, resultCode, data);
+            int performedIndex = -1;
+            for (int i = mCallbackParams.size() - 1; i >= 0; i--) {
+                CallbackParams callbackParams = mCallbackParams.get(i);
+                if (callbackParams.requestCode == requestCode) {
+                    callbackParams.callback.onActivityResult(requestCode, resultCode, data);
+                    performedIndex = i;
+                    break;
+                }
+            }
+            if (performedIndex > -1) { // 完成之后删除 Callback
+                mCallbackParams.remove(performedIndex);
+            }
+        }
+
+        private static class IntentConfig {
+            Intent intent;
+            int requestCode;
+            Bundle options;
+
+            public IntentConfig(Intent intent, int requestCode, Bundle options) {
+                this.intent = intent;
+                this.requestCode = requestCode;
+                this.options = options;
+            }
+        }
+
+        private static class CallbackParams {
+            int requestCode;
+            OnActivityResultCallback callback;
+
+            public CallbackParams(int requestCode, OnActivityResultCallback callback) {
+                this.requestCode = requestCode;
+                this.callback = callback;
+            }
+        }
     }
 
     public interface OnPermissionsResultCallback {
         void onPermissionsResult(int requestCode, String[] permissions, int[] grantResults);
     }
 
+    public interface OnActivityResultCallback {
+        void onActivityResult(int requestCode, int resultCode, Intent data);
+    }
 }
