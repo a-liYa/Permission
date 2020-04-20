@@ -295,6 +295,15 @@ public class PermissionManager {
         return true;
     }
 
+    public static boolean checkPermission(Context context, Permission... permissions) {
+        for (Permission permission : permissions) {
+            if (context.checkPermission(permission.getPermission(), android.os.Process.myPid(),
+                    Process.myUid()) != PackageManager.PERMISSION_GRANTED)
+                return false;
+        }
+        return true;
+    }
+
     /**
      * 获取应用设置页面的 Intent
      *
