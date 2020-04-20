@@ -1,14 +1,14 @@
 apply plugin: 'com.android.library'
 
 ext {
-    version_code = 50
-    version_name = '0.5.1'
+    version_code = 60
+    version_name = '0.6.0'
 }
 
 android {
     compileSdkVersion 28
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 28
         versionCode version_code
         versionName version_name

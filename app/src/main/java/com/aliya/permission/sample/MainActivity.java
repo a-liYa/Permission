@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     static {
         sList.add(new ListEntity(PermissionSampleActivity.class, "Activity使用示例"));
         sList.add(new ListEntity(NeverAskActivity.class, "不再询问处理示例"));
+        sList.add(new ListEntity(ResultActivity.class, "OnActivityResult"));
     }
 
     @Override
