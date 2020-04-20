@@ -50,7 +50,6 @@ public class PermissionManager {
         return mInstance;
     }
 
-    private Set<String> mManifestPermissions;
     private final SparseArray<OpEntity> mRequestCaches;
     private final ResultHelper.OnPermissionsResultCallback mPermissionsResultCallback;
 
