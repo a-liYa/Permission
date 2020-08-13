@@ -9,7 +9,7 @@ android {
     compileSdkVersion build_versions.compile_sdk
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion build_versions.min_sdk
         targetSdkVersion build_versions.targer_sdk
         versionCode version_code
         versionName version_name
