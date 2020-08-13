@@ -115,7 +115,11 @@ public final class ResultHelper {
 
             if (mWaitingStartActivities != null) {
                 for (IntentConfig config : mWaitingStartActivities) {
-                    startActivityForResult(config.intent, config.requestCode, config.options);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        startActivityForResult(config.intent, config.requestCode, config.options);
+                    } else {
+                        startActivityForResult(config.intent, config.requestCode);
+                    }
                 }
                 mWaitingStartActivities = null; // onCreate 之后不再使用，置空。
             }
@@ -155,7 +159,11 @@ public final class ResultHelper {
             if (callback != null)
                 mCallbackParams.add(new CallbackParams(requestCode, callback));
             if (isAdded()) {
-                startActivityForResult(intent, requestCode, options);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    startActivityForResult(intent, requestCode, options);
+                } else {
+                    startActivityForResult(intent, requestCode);
+                }
             } else {
                 if (mWaitingStartActivities == null) {
                     mWaitingStartActivities = new ArrayList<>(1);
