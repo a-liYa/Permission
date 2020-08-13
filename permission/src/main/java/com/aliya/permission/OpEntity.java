@@ -1,10 +1,8 @@
 package com.aliya.permission;
 
 import android.app.Activity;
-import android.content.Context;
 
 import java.io.Serializable;
-import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
