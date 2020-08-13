@@ -8,13 +8,14 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 /**
  * 通过设置 Callback 实现 Activity#onRequestPermissionsResult(int, String[], String[]) 回调

@@ -3,7 +3,7 @@
 buildscript {
     
     repositories {
-        apply from: "https://gitee.com/a_liYa/gradleconfig/raw/master/dependency/versions-28.gradle"
+        apply from: "https://gitee.com/a_liYa/gradleconfig/raw/master/dependency/versions.gradle"
         addAliyunRepos(repositories)
 //        addRepos(repositories)
     }

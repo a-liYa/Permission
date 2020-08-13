@@ -26,7 +26,7 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    compileOnly deps.support.annotations
+    compileOnly deps.androidx.annotations
 }
 
 apply from: "${rootDir}/publish.gradle"
