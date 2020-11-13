@@ -60,17 +60,17 @@ public final class ResultHelper {
         return true;
     }
 
-    public static boolean startActivityForResult(Context context,
+    public static boolean startActivityForResult(Context activityContext,
                                                  Intent intent, int requestCode,
                                                  OnActivityResultCallback callback) {
-        return startActivityForResult(context, intent, requestCode, null, callback);
+        return startActivityForResult(activityContext, intent, requestCode, null, callback);
     }
 
-    public static boolean startActivityForResult(Context context,
+    public static boolean startActivityForResult(Context activityContext,
                                                  Intent intent, int requestCode, Bundle options,
                                                  OnActivityResultCallback callback) {
-        if (context instanceof Activity) {
-            Activity activity = ((Activity) context);
+        Activity activity = getActivityByContext(activityContext);
+        if (activity != null) {
             FragmentManager manager = activity.getFragmentManager();
             InnerResultFragment resultFragment;
             Fragment fragmentByTag = manager.findFragmentByTag(FRAGMENT_TAG);
