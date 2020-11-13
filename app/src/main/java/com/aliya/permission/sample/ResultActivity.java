@@ -8,6 +8,12 @@ import android.view.View;
 import com.aliya.permission.ResultHelper;
 import com.aliya.permission.sample.utils.T;
 
+/**
+ * 借助 Fragment 实现监听 onActivityResult() 回调
+ *
+ * @author a_liYa
+ * @date 2020/11/13 15:38.
+ */
 public class ResultActivity extends AppCompatActivity {
 
     @Override

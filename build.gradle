@@ -5,7 +5,7 @@ buildscript {
     repositories {
         apply from: "https://gitee.com/a_liYa/gradleconfig/raw/master/dependency/versions.gradle"
         addAliyunRepos(repositories)
-//        addRepos(repositories)
+        addRepos(repositories)
     }
     dependencies {
         classpath deps.gradle_plugin
@@ -31,13 +31,6 @@ allprojects {
 //        options.addStringOption('Xdoclint:none', '-quiet') // 避免javadoc的检查
     }
 }
-
-//wrapper {
-//    distributionType = Wrapper.DistributionType.ALL
-//    gradleVersion = '5.4.1'
-//    distributionUrl="https\\://services.gradle.org/distributions/gradle-5.4.1-all.zip"
-//}
-
 
 task clean(type: Delete) {
     delete rootProject.buildDir

@@ -1,23 +1,25 @@
 package com.aliya.permission;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
 import android.provider.Settings;
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
+import android.text.TextUtils;
 import android.util.SparseArray;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 /**
  * 动态权限申请工具类
@@ -287,33 +289,38 @@ public class PermissionManager {
      */
     public static boolean checkPermission(Context context, String... permissions) {
         for (String permission : permissions) {
-            // 对比 PermissionChecker.checkSelfPermission(sContext, permission)
-            if (context.checkPermission(permission, android.os.Process.myPid(), Process.myUid()) !=
-                    PackageManager.PERMISSION_GRANTED)
-                return false;
+            // 特殊权限 - 在其他应用上层显示应用的权限
+            if (TextUtils.equals(permission, Manifest.permission.SYSTEM_ALERT_WINDOW)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context))
+                    return false;
+            } else
+                // 对比 PermissionChecker.checkSelfPermission(sContext, permission)
+                if (context.checkPermission(
+                        permission,
+                        android.os.Process.myPid(),
+                        Process.myUid())
+                        != PackageManager.PERMISSION_GRANTED)
+                    return false;
         }
         return true;
     }
 
     public static boolean checkPermission(Context context, Permission... permissions) {
-        for (Permission permission : permissions) {
-            if (context.checkPermission(permission.getPermission(), android.os.Process.myPid(),
-                    Process.myUid()) != PackageManager.PERMISSION_GRANTED)
-                return false;
+        String[] stringPermissions = new String[permissions.length];
+        for (int i = 0; i < permissions.length; i++) {
+            stringPermissions[i] = permissions[i].getPermission();
         }
-        return true;
+        return checkPermission(context, stringPermissions);
     }
 
     /**
      * 获取应用设置页面的 Intent
      *
-     * @param context A any context
-     * @return intent
+     * @see SettingIntents#getAppDetailsIntent(Context)
      */
+    @Deprecated
     public static Intent getSettingIntent(Context context) {
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        intent.setData(Uri.parse("package:" + context.getPackageName()));
-        return intent;
+        return SettingIntents.getAppDetailsIntent(context);
     }
 
     static void initContext(Context context) {
