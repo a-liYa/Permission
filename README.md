@@ -1,14 +1,16 @@
 # Permission
 Android 权限申请工具类，一行代码即可申请权限
 
+**支持 Androidx**
+
 ## 依赖
 [![License](https://img.shields.io/badge/License-Apache%202.0-337ab7.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Download](https://api.bintray.com/packages/a-liya/maven/permission/images/download.svg)](https://bintray.com/a-liya/maven/permission/_latestVersion)
-[![MinSdk](https://img.shields.io/badge/%20MinSdk%20-%2014%20-f0ad4e.svg)](https://android-arsenal.com/api?level=12)
+[![MinSdk](https://img.shields.io/badge/%20MinSdk%20-%2016%20-f0ad4e.svg)](https://android-arsenal.com/api?level=12)
 
 ```
 dependencies {
-    implementation 'com.aliya:permission:0.5.1'
+    implementation 'com.aliya:permission:1.0.0'
 }
 ```
 

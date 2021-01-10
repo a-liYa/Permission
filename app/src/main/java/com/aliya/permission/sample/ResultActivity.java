@@ -2,12 +2,18 @@ package com.aliya.permission.sample;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 
 import com.aliya.permission.ResultHelper;
 import com.aliya.permission.sample.utils.T;
 
+/**
+ * 借助 Fragment 实现监听 onActivityResult() 回调
+ *
+ * @author a_liYa
+ * @date 2020/11/13 15:38.
+ */
 public class ResultActivity extends AppCompatActivity {
 
     @Override

@@ -8,13 +8,14 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 /**
  * 通过设置 Callback 实现 Activity#onRequestPermissionsResult(int, String[], String[]) 回调
@@ -59,17 +60,17 @@ public final class ResultHelper {
         return true;
     }
 
-    public static boolean startActivityForResult(Context context,
+    public static boolean startActivityForResult(Context activityContext,
                                                  Intent intent, int requestCode,
                                                  OnActivityResultCallback callback) {
-        return startActivityForResult(context, intent, requestCode, null, callback);
+        return startActivityForResult(activityContext, intent, requestCode, null, callback);
     }
 
-    public static boolean startActivityForResult(Context context,
+    public static boolean startActivityForResult(Context activityContext,
                                                  Intent intent, int requestCode, Bundle options,
                                                  OnActivityResultCallback callback) {
-        if (context instanceof Activity) {
-            Activity activity = ((Activity) context);
+        Activity activity = getActivityByContext(activityContext);
+        if (activity != null) {
             FragmentManager manager = activity.getFragmentManager();
             InnerResultFragment resultFragment;
             Fragment fragmentByTag = manager.findFragmentByTag(FRAGMENT_TAG);
@@ -114,7 +115,11 @@ public final class ResultHelper {
 
             if (mWaitingStartActivities != null) {
                 for (IntentConfig config : mWaitingStartActivities) {
-                    startActivityForResult(config.intent, config.requestCode, config.options);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        startActivityForResult(config.intent, config.requestCode, config.options);
+                    } else {
+                        startActivityForResult(config.intent, config.requestCode);
+                    }
                 }
                 mWaitingStartActivities = null; // onCreate 之后不再使用，置空。
             }
@@ -154,7 +159,11 @@ public final class ResultHelper {
             if (callback != null)
                 mCallbackParams.add(new CallbackParams(requestCode, callback));
             if (isAdded()) {
-                startActivityForResult(intent, requestCode, options);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    startActivityForResult(intent, requestCode, options);
+                } else {
+                    startActivityForResult(intent, requestCode);
+                }
             } else {
                 if (mWaitingStartActivities == null) {
                     mWaitingStartActivities = new ArrayList<>(1);

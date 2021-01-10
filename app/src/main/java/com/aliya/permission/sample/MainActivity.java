@@ -1,7 +1,6 @@
 package com.aliya.permission.sample;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
 
 import com.aliya.fast.adapter.FastAdapter;
@@ -9,6 +8,8 @@ import com.aliya.fast.entity.ListEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,7 +30,5 @@ public class MainActivity extends AppCompatActivity {
 
         mListView = findViewById(R.id.list_view);
         mListView.setAdapter(new FastAdapter(sList));
-
     }
-
 }

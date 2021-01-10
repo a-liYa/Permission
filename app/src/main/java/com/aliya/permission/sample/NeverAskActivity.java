@@ -3,16 +3,18 @@ package com.aliya.permission.sample;
 import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 
 import com.aliya.permission.Permission;
 import com.aliya.permission.PermissionManager;
+import com.aliya.permission.ResultHelper;
+import com.aliya.permission.SettingIntents;
 import com.aliya.permission.abs.AbsPermissionCallback;
 import com.aliya.permission.sample.utils.T;
 
 import java.util.List;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * 不再询问 - 测试页
@@ -28,6 +30,7 @@ public class NeverAskActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_never_ask);
 
         findViewById(R.id.tv_location).setOnClickListener(this);
+        findViewById(R.id.tv_overlay).setOnClickListener(this);
     }
 
     @Override
@@ -36,6 +39,28 @@ public class NeverAskActivity extends AppCompatActivity implements View.OnClickL
             case R.id.tv_location:
                 requestLocationPermission();
                 break;
+            case R.id.tv_overlay:
+                openOverlayPermission();
+                break;
+        }
+    }
+
+    private void openOverlayPermission() {
+        final String permission = Manifest.permission.SYSTEM_ALERT_WINDOW;
+        if (!PermissionManager.checkPermission(this, permission)) {
+            ResultHelper.startActivityForResult(this,
+                    SettingIntents.getOverlayPermissionIntent(this),
+                    101, new ResultHelper.OnActivityResultCallback() {
+                        @Override
+                        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+                            boolean result =
+                                    PermissionManager.checkPermission(getBaseContext(), permission);
+
+                            T.showShort(NeverAskActivity.this, result ? "通过" : "拒绝");
+                        }
+                    });
+        } else {
+            T.showShort(NeverAskActivity.this,  "显示在上层权限已允许");
         }
     }
 
@@ -57,7 +82,9 @@ public class NeverAskActivity extends AppCompatActivity implements View.OnClickL
                         (NeverAskActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION);
                 if (!before && !after) {
                     // 此处应该Dialog提醒
-                    startActivityForResult(PermissionManager.getSettingIntent(getApplication()), 100);
+                    // 此处未使用 ResultHelper, 防止权限关闭引起页面重启，回调失效
+                    startActivityForResult(SettingIntents.getAppDetailsIntent(getApplication()),
+                            100);
                 }
             }
 
@@ -67,9 +94,9 @@ public class NeverAskActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.e("TAG", "onActivityResult: " + getClass().getSimpleName() + " - " + requestCode);
         if (requestCode == 100) {
-            if (PermissionManager.checkPermission(getApplication(), Permission.LOCATION_COARSE.getPermission())) {
+            if (PermissionManager.checkPermission(getApplication(),
+                    Permission.LOCATION_COARSE.getPermission())) {
                 T.showShort(this, "手动授权成功");
             } else {
                 T.showShort(this, "手动授权失败");
